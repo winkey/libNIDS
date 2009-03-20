@@ -25,7 +25,7 @@
 
 #include "../include/NIDS.h"
 #include "get.h"
-#include "precip.h"
+#include "d_precip.h"
 #include "error.h"
 
 /*******************************************************************************

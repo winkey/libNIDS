@@ -22,6 +22,7 @@
 #include <time.h>
 #include <errno.h>
 #include <bzlib.h>
+#include <zlib.h>
 
 #include "../include/NIDS.h"
 #include "image.h"
@@ -33,6 +34,9 @@
 #include "product_dependent_desc.h"
 #include "color.h"
 #include "error.h"
+#include "myzlib.h"
+
+
 
 FILE *NIDS_open(char *filename) {
 	FILE *result = NULL;
@@ -50,46 +54,100 @@ void NIDS_close(FILE *fp) {
 }
 
 void NIDS_read (FILE *fp, NIDS *data) {
-  char *buf;
-	char *nbuf;
+  buffer buf = {};
+	buffer ubuf = {};
+	
+
 	char *p;
 	char nws[100] = {};
 	char *bzbuf = NULL;
 	int bze;
-	
-	if (!(buf = malloc(1024)))
-		ERROR("NIDS_read");
+	char *temp = NULL;
+
 	
 	/***** read the tacked on nws header *****/
 	
 	if (!fread(nws, 30, 1, fp))
 		ERROR("NIDS_read");
-		
+			
+	if (*nws == 1)
+		if (!fread(nws + 30, 11, 1, fp))
+			ERROR("NIDS_read");
+	
 	printf("%s\n", nws);
 	
-	/***** read the first 18 *****/
+	/***** aloc initial buffer memory *****/
 	
-	if (!fread(buf, 18, 1, fp))
+	if (!(buf.buf = malloc(BUFSIZE)))
 		ERROR("NIDS_read");
 	
-  p = parse_msg_header(buf, &(data->msg));
-  
+	buf.alloced = BUFSIZE;
 	
-
-	
-	
-	if (data->msg.len > 1024) {
-		if (!(nbuf = realloc(buf, data->msg.len)))
-			ERROR("NIDS_read");
+	do {
+		size_t read;
 		
-		buf = nbuf;
-		p = buf + 18;
+		/***** realloc if we need more *****/
+		
+		while (buf.used + BUFSIZE > buf.alloced) {
+			buf.alloced *= 2;
+			
+			if (!(temp = realloc(buf.buf, buf.alloced)))
+				ERROR("NIDS_read");
+			
+			buf.buf = temp;
+		}
+		
+		/***** read data *****/
+		
+		if (!(read = fread(buf.buf + buf.used, 1, buf.alloced - buf.used, fp))) {
+			if (ferror(fp))
+				ERROR("NIDS_read");
+		}
+		
+		buf.used += read;
+		
+	} while (!feof(fp) && read > 0);
+	
+	p = buf.buf;
+	
+	/***** zlibed? *****/
+	
+	if (is_zlib((unsigned char *)buf.buf)) {
+		
+		unzlib(&buf, &ubuf);
+		
+		/***** if there is any data left its uncompressed, copy it *****/
+		
+		if (buf.parsed < buf.used) {
+
+			while (ubuf.alloced - ubuf.used < buf.used - buf.parsed) {
+				ubuf.alloced *= 2;
+			
+				if (!(temp = realloc(ubuf.buf, ubuf.alloced)))
+					ERROR("NIDS_read");
+			
+				ubuf.buf = temp;
+			}
+			
+			memcpy(ubuf.buf + ubuf.used, buf.buf + buf.used, buf.used - buf.parsed);
+			ubuf.used += buf.used - buf.parsed;
+			
+			}
+		
+	p = ubuf.buf + 54;
+		
+
 	}
 	
-	if (!fread(buf + 18, data->msg.len - 18, 1, fp))
-		ERROR("NIDS_read");
+	/***** parse the header *****/
+	
+  p = parse_msg_header(p, &(data->msg));
+ 
+	/***** parse prod dep desc *****/
 	
 	parse_product_dependent_desc(data->msg.code, p, &(data->pdd));
+	
+	/***** parse prod desc *****/
 	
 	p = parse_prod_desc(p, &(data->prod));
 	
@@ -101,7 +159,7 @@ void NIDS_read (FILE *fp, NIDS *data) {
 		if (0 > (bze = BZ2_bzBuffToBuffDecompress(bzbuf,
 															 &(data->pdd.uncompressed_size),
 															 p,
-															 data->msg.len - (p - buf),
+															 data->msg.len - (p - buf.buf),
 															 0,
 															 0))) {
 			fprintf (stderr, "bze = %i\n", bze);
@@ -116,7 +174,7 @@ void NIDS_read (FILE *fp, NIDS *data) {
 		/***** stand alone tabular_alphanumeric *****/
 		
 		case 62:
-			p = parse_tabular_alphanumeric(buf - 8, &(data->tab));
+			p = parse_tabular_alphanumeric(buf.buf - 8, &(data->tab));
 			break;
 		
 		default:
@@ -132,7 +190,9 @@ void NIDS_read (FILE *fp, NIDS *data) {
 	
 	if (bzbuf)
 		free(bzbuf);
-	free(buf);
+	if (ubuf.buf)
+		free(ubuf.buf);
+	free(buf.buf);
   
 }
 
@@ -171,6 +231,8 @@ char *NIDS_to_raster(
 	im.y_center = RASTER_Y_SIZE / 2;
 	*width = im.width = RASTER_X_SIZE;
 	*height = im.height = RASTER_Y_SIZE;
+	im.scale = 1;
+	
 	
 	if (!(im.raster = calloc(RASTER_X_SIZE, RASTER_Y_SIZE)))
 		ERROR("NIDS_to_raster");
@@ -180,6 +242,9 @@ char *NIDS_to_raster(
 	
 	return im.raster;
 }
+
+
+
 
 void NIDS_get_color(
 	NIDS *data,

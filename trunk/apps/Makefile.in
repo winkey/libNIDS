@@ -32,7 +32,8 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-bin_PROGRAMS = nids2raster$(EXEEXT) nidsinfo$(EXEEXT)
+bin_PROGRAMS = nids2raster$(EXEEXT) nidsinfo$(EXEEXT) \
+	NIDS2gdal$(EXEEXT)
 subdir = apps
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -45,12 +46,15 @@ CONFIG_CLEAN_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 PROGRAMS = $(bin_PROGRAMS)
-am_nids2raster_OBJECTS = nids2raster.$(OBJEXT)
-nids2raster_OBJECTS = $(am_nids2raster_OBJECTS)
-nids2raster_LDADD = $(LDADD)
-nids2raster_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
+am_NIDS2gdal_OBJECTS = NIDS2gdal.$(OBJEXT) gdalcode.$(OBJEXT)
+NIDS2gdal_OBJECTS = $(am_NIDS2gdal_OBJECTS)
+NIDS2gdal_LDADD = $(LDADD)
+NIDS2gdal_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(nids2raster_LDFLAGS) $(LDFLAGS) -o $@
+	$(NIDS2gdal_LDFLAGS) $(LDFLAGS) -o $@
+nids2raster_SOURCES = nids2raster.c
+nids2raster_OBJECTS = nids2raster.$(OBJEXT)
+nids2raster_LDADD = $(LDADD)
 am_nidsinfo_OBJECTS = nidsinfo.$(OBJEXT)
 nidsinfo_OBJECTS = $(am_nidsinfo_OBJECTS)
 nidsinfo_LDADD = $(LDADD)
@@ -69,8 +73,8 @@ CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
-SOURCES = $(nids2raster_SOURCES) $(nidsinfo_SOURCES)
-DIST_SOURCES = $(nids2raster_SOURCES) $(nidsinfo_SOURCES)
+SOURCES = $(NIDS2gdal_SOURCES) nids2raster.c $(nidsinfo_SOURCES)
+DIST_SOURCES = $(NIDS2gdal_SOURCES) nids2raster.c $(nidsinfo_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -126,6 +130,8 @@ PACKAGE_STRING = @PACKAGE_STRING@
 PACKAGE_TARNAME = @PACKAGE_TARNAME@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
+PROJ_INCLUDE = @PROJ_INCLUDE@
+PROJ_STATIC = @PROJ_STATIC@
 RANLIB = @RANLIB@
 SED = @SED@
 SET_MAKE = @SET_MAKE@
@@ -183,21 +189,24 @@ sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
+NIDS2gdal_SOURCES = \
+	NIDS2gdal.c\
+	gdalcode.c \
+	gdalcode.h
+
+NIDS2gdal_LDFLAGS = \
+	-L../src/.libs \
+	-lNIDS \
+	-lz \
+	-lgdal
+
 nidsinfo_SOURCES = \
 	nidsinfo.c
 
 nidsinfo_LDFLAGS = \
-	-L../src/.libs\
-	-lNIDS
-
-nids2raster_SOURCES = \
-	nids2raster.c
-
-nids2raster_LDFLAGS = \
 	-L../src/.libs \
 	-lNIDS \
-	-ltiff \
-	-lm
+	-lz
 
 all: all-am
 
@@ -260,9 +269,12 @@ clean-binPROGRAMS:
 	  echo " rm -f $$p $$f"; \
 	  rm -f $$p $$f ; \
 	done
+NIDS2gdal$(EXEEXT): $(NIDS2gdal_OBJECTS) $(NIDS2gdal_DEPENDENCIES) 
+	@rm -f NIDS2gdal$(EXEEXT)
+	$(NIDS2gdal_LINK) $(NIDS2gdal_OBJECTS) $(NIDS2gdal_LDADD) $(LIBS)
 nids2raster$(EXEEXT): $(nids2raster_OBJECTS) $(nids2raster_DEPENDENCIES) 
 	@rm -f nids2raster$(EXEEXT)
-	$(nids2raster_LINK) $(nids2raster_OBJECTS) $(nids2raster_LDADD) $(LIBS)
+	$(LINK) $(nids2raster_OBJECTS) $(nids2raster_LDADD) $(LIBS)
 nidsinfo$(EXEEXT): $(nidsinfo_OBJECTS) $(nidsinfo_DEPENDENCIES) 
 	@rm -f nidsinfo$(EXEEXT)
 	$(nidsinfo_LINK) $(nidsinfo_OBJECTS) $(nidsinfo_LDADD) $(LIBS)
@@ -273,6 +285,8 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/NIDS2gdal.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gdalcode.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/nids2raster.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/nidsinfo.Po@am__quote@
 

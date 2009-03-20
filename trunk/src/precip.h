@@ -57,6 +57,23 @@ returns:
 
 void print_precip_header(NIDS_precip *r, char *prefix);
 
+/*******************************************************************************
+	function to convert a raster to a raster
+
+args:
+						r				the structure that holds the radials
+						width		pointer to return the width of the raster in
+						height	pointer to return the height of the raster in
+
+returns:
+						a char pointer to the raster data
+
+*******************************************************************************/
+
+void precips_to_raster (
+	NIDS_image *im,
+	NIDS_precip *r);
+
 #endif /* _PRECIP_H */
 
  

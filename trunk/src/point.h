@@ -21,6 +21,19 @@
 #define _POINT_H
 
 /*******************************************************************************
+	function to parse a single point
+	
+args:
+							buf			the buffer pointing to the first byte of the point
+							p				the struct to store the point in;
+
+returns:
+							pointer to the next byte in the buffer 
+*******************************************************************************/
+
+char *parse_point (char *buf, NIDS_point *p);
+
+/*******************************************************************************
 	function to parse a point packet
 	
 args:					buf			the buffer pointing to the start of the point packet
@@ -43,6 +56,19 @@ returns:
 *******************************************************************************/
 
 void free_point_header(NIDS_points *p);
+
+/*******************************************************************************
+	function to print a single point
+
+args:
+						p				the structure the point is stored in
+						prefix	the start of the line
+
+returns:
+						nothing
+*******************************************************************************/
+
+void print_point(NIDS_point *p, char *prefix);
 
 /*******************************************************************************
 	function to print a point packet

@@ -5,7 +5,8 @@
 INCLUDES = \
 	-DPACKAGE_LOCALE_DIR=\""$(prefix)/$(DATADIRNAME)/locale"\" \
 	-DPACKAGE_SRC_DIR=\""$(srcdir)"\" \
-	-DPACKAGE_DATA_DIR=\""$(datadir)"\" 
+	-DPACKAGE_DATA_DIR=\""$(datadir)"\" \
+	-DPACKAGE_PKG_DATA_DIR=\""$(pkgdatadir)"\"
 
 AM_CFLAGS =\
 	 -Wall\
@@ -71,9 +72,24 @@ libNIDS_la_SOURCES = \
 	hail.h       \
 	hail.c       \
 	image.c       \
-	image.h       
+	image.h       \
+	tvs.c       \
+	tvs.h       \
+	etvs.h       \
+	etvs.c       \
+	hail_positive.c       \
+	hail_positive.h       \
+	hail_probable.h       \
+	hail_probable.c       \
+	mesocyclone.c       \
+	mesocyclone.h       \
+	proj.c       \
+	myzlib.c       \
+	myzlib.h
 
-libNIDS_la_LDFLAGS = \
+libNIDS_la_LDFLAGS =           \
 	-lm           \
-	-lbz2
+	-lbz2           \
+	-lproj           \
+	-lz
 

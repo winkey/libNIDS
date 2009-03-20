@@ -29,6 +29,7 @@
 
 #include "error.h"
 #include "image.h"
+
 #include "radial.h"
 
 /*******************************************************************************
@@ -69,16 +70,16 @@ char *parse_radial(char *buf, NIDS_radial *r) {
 	r->start /= 10;
 	r->delta = GET2(buf + 4);
 	r->delta /= 10;
-	
-	if (!(r->run = malloc(r->num_rle * 2)))
+	r->num_rle *= 2;
+	if (!(r->run = malloc(r->num_rle)))
 		ERROR("parse_radial");
 	
-	if (!(r->code = malloc(r->num_rle * 2)))
+	if (!(r->code = malloc(r->num_rle)))
 		ERROR("parse_radial");
 	
 	p = buf + 6;
 	
-	for (i = 0 ; i < r->num_rle * 2 ; i++) {
+	for (i = 0 ; i < r->num_rle ; i++) {
 		r->run[i] = (p[i] >> 4) & 0x0f;
 		r->code[i] = p[i] & 0x0f;
 	}
@@ -219,7 +220,7 @@ void print_radial_header(NIDS_radials *r, char *prefix) {
 
 #define PI 3.14159265
 
-void radial_convert(float angle, float delta, int bin, int *x, int *y) {
+void radial_convert(float angle, int bin, int *x, int *y) {
 	float r_angle = angle * (PI / 180);
 	
 	*x = bin * cos(r_angle);
@@ -237,7 +238,7 @@ void radial_to_raster (NIDS_radial *r, NIDS_image *im) {
 	float k, angle;
 	int bin = 1;
 	
-	for (i = 0 ; i < r->num_rle * 2 ; i++) {
+	for (i = 0 ; i < r->num_rle ; i++) {
 		for (j = 0 ; j < r->run[i] ; j++, bin++) {
 			for (k = -(r->delta / 2) ; k <= r->delta / 2; k += 0.1) {
 				
@@ -246,7 +247,7 @@ void radial_to_raster (NIDS_radial *r, NIDS_image *im) {
 				else
 					angle = r->start + k;
 			
-				radial_convert(angle , r->delta, bin, &x, &y);
+				radial_convert(angle, bin, &x, &y);
 				
 				plot(im, y, -x, r->code[i]);
 			}
@@ -274,8 +275,8 @@ void radials_to_raster (
 {
 	int i;
 
-	im->x_center = 256;
-	im->x_center = 280;
+	//im->x_center = im->width / 2;
+	//im->x_center = im->width / 2;
 	//r->x_center,
 	//r->y_center);
 	
@@ -283,3 +284,81 @@ void radials_to_raster (
 		radial_to_raster(r->radials + i, im);
 	
 }
+
+
+/*******************************************************************************
+	function to convert a single radial to 3d vectors
+
+args:
+						v				the structure that holds the 3d vectors
+						r				the structure that holds the radial
+						elev		the elevation angle of the beam
+
+returns:
+						nothing
+*******************************************************************************/
+/*
+void radial_to_vectors3d (
+	ThreeD_atmos_buf *buf,
+	NIDS_radial *r,
+	float elev,
+	void *extra)
+{
+	double point[4];
+	
+	float angle, zangle;
+	float r_angle, r_zangle;
+	int i;
+	int binstart = 0, binend = 0;
+	angle = r->start;
+	zangle = elev;
+	
+	for (i = 0 ; i < r->num_rle ; i++) {
+		binstart = binend;
+		binend = r->run[i];
+		
+		
+		for (j = 0 ; j < r->run[i] ; j++, bin++) {
+			
+			r_angle = angle * (PI / 180);
+			r_zangle = zangle * (PI / 180);
+			
+			point[0] = bin * sin(r_angle); //x
+			point[1] = -(bin * cos(r_angle)); //y
+			point[2] = (bin * sin(r_zangle)); //z
+			point[3] = r->code[i];
+			
+			KDTree_insert(tree, point, NULL);
+			
+		}
+	}
+	
+}
+*/
+/*******************************************************************************
+	function to convert radials to 3d vectors
+
+args:
+						v				the structure that holds the 3d vectors
+						r				the structure that holds the radials
+						elev		the elevation angle of the beam
+
+returns:
+						nothing
+
+*******************************************************************************/
+/*
+void radials_to_3datmos (
+	ThreeD_atmos_buf *buf,
+	NIDS_radials *r,
+	float elev,
+	void *extra)
+{
+	int i;
+
+	for (i = 0 ; i < r->num_radials ; i++)
+		radial_to_vectors3d(buf, r->radials + i, elev, extra);
+	
+}
+
+*/

@@ -3,7 +3,10 @@
 
 SUBDIRS = src \
 	include\
-	apps
+	apps  \
+	share  \
+	scripts  \
+	etc
 
 libnidsdocdir = ${prefix}/doc/libnids
 libnidsdoc_DATA = \

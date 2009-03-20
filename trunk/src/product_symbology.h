@@ -84,6 +84,8 @@ void product_symbology_to_raster(
 	NIDS_image *im,
 	NIDS_product_symbology *s);
 
+
+
 #endif /* _PRODUCT_SYMBOLOGY_H */
 
  

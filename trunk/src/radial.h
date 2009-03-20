@@ -77,6 +77,7 @@ void radials_to_raster(
 	NIDS_image *im,
 	NIDS_radials *r);
 
+
 #endif /* _RADIAL_H */
 
  

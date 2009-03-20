@@ -38,7 +38,7 @@ void plot(
 	int value)
 {
 	
-	//printf("%i,%i %i,%i\n", i->x_center, i->y_center, x, y);
+	//printf("plot %i,%i %i,%i\n", im->x_center, im->y_center, x, y);
 	if (im->x_center + x >= im->width || im->x_center + x < 0)
 		fprintf(stderr, "WARNING: raster x value %i out of range, skipping\n", x + im->x_center);
 	

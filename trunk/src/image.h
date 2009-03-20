@@ -26,6 +26,7 @@ typedef struct {
 	int y_center;
 	int width;
 	int height;
+	int scale;			//divisor
 } NIDS_image;
 
 void plot(
