@@ -219,6 +219,11 @@ typedef struct {
 	NIDS_point *points;
 } NIDS_points;
 
+typedef NIDS_points NIDS_tvss;
+typedef NIDS_points NIDS_etvss;
+typedef NIDS_points NIDS_hail_positives;
+typedef NIDS_points NIDS_hail_probables;
+
 /*******************************************************************************
 	Unlinked Vector
 *******************************************************************************/
@@ -255,7 +260,7 @@ typedef struct {
 } NIDS_v_vectors;
 
 /*******************************************************************************
-	special graphic symbol circle
+	circle
 *******************************************************************************/
 
 typedef struct {
@@ -269,6 +274,15 @@ typedef struct {
 	int num_circles;
 	NIDS_circle *circles;
 } NIDS_circles;
+
+
+typedef NIDS_circle NIDS_mesocyclone;
+
+typedef struct {
+	size_t length;
+	int num_mesocyclones;
+	NIDS_mesocyclone *mesocyclones;
+} NIDS_mesocyclones;
 
 /*******************************************************************************
 	Precipitation Array
@@ -385,7 +399,7 @@ typedef struct {
 
 #define TEXT1							0x0001
 #define TEXT2							0x0002
-#define CIRCLE1						0x0003
+#define MESOCYCLONE1 			0x0003
 #define BARB							0x0004
 #define ARROW							0x0005
 #define LINKED_VECTOR			0x0006
@@ -393,10 +407,10 @@ typedef struct {
 #define V_TEXT						0x0008
 #define V_LINKED_VECTOR		0x0009
 #define V_VECTOR					0x000A
-#define CIRCLE2						0x000B
-#define POINT1						0x000C
-#define POINT2						0x000D
-#define POINT3						0x000E
+#define MESOCYCLONE2			0x000B
+#define TVS								0x000C
+#define HAIL_POSITIVE			0x000D
+#define HAIL_PROBABLE			0x000E
 #define STORM_ID					0x000F
 #define D_RADIAL					0x0010
 #define D_PRECIP					0x0011
@@ -407,7 +421,7 @@ typedef struct {
 #define FORECAST1					0x0017
 #define FORECAST2					0x0018
 #define CIRCLE3						0x0019
-#define POINT4						0x001A
+#define ETVS							0x001A
 
 #define RADIAL						0xAF1F
 #define RASTER1						0xBA0F
@@ -431,6 +445,10 @@ typedef struct {
 		NIDS_arrows arrow;
 		NIDS_point_features point_feature;
 		NIDS_points point;
+		NIDS_tvss tvs;
+		NIDS_etvss etvs;
+		NIDS_hail_positives hail_positive;
+		NIDS_hail_probables hail_probable;
 		NIDS_barbs barb;
 		NIDS_hails hail;
 		NIDS_d_precip d_precip;
@@ -438,6 +456,7 @@ typedef struct {
 		NIDS_vectors vector;
 		NIDS_v_vectors v_vector;
 		NIDS_circles circle;
+		NIDS_mesocyclones mesocyclone;
 		NIDS_text text;
 		NIDS_v_text v_text;
 		NIDS_storm_ids storm_id;
@@ -528,6 +547,7 @@ typedef struct {
 	NIDS_tabular_alphanumeric tab;
 } NIDS;
 
+
 FILE *NIDS_open(char *filename);
 
 void NIDS_close(FILE *fp);
@@ -545,12 +565,16 @@ char *NIDS_to_raster(
 	int *height);
 
 typedef struct {
-	unsigned char codes[4];
+  char value[10];
+  char color[7];
 } NIDS_color;
 
 void NIDS_get_color(
 	NIDS *data,
 	NIDS_color **colors);
+
+
+
 
 
 #endif /* _NIDS_H */

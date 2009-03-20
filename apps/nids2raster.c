@@ -119,7 +119,12 @@ Step 5: Having completely defined the Raster & Model coordinate system,
 		for (j = 0; j < width ; j++) {
 			pixel = rast[j + i * width];
 			if (colors) {
-				memcpy(&line[j * 4], colors[(int)pixel].codes, 4);
+				sscanf(colors[(int)pixel].color, "%2x%2x%2x",
+							 line + j * 4, line + j * 4 + 1, line + j * 4 + 2);
+				if (pixel)
+					line[j * 4 + 3] = 0xff;
+				else
+					line[j * 4 + 3] = 0x00;
 			}
 			else if (pixel) {
 				line[j * 4] = 0xff;

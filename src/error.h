@@ -20,6 +20,11 @@
 #ifndef _ERROR_H
 #define _ERROR_H
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <errno.h>
+
 #define ERROR(x) {\
   fprintf(stderr, "ERROR:\n      file: %s\n      line: %d\n      function:  %s\n      %s\n",\
 	        __FILE__, __LINE__, (x), strerror(errno));\

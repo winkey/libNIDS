@@ -29,6 +29,10 @@
 #include "radial.h"
 #include "raster.h"
 #include "arrow.h"
+#include "tvs.h"
+#include "etvs.h"
+#include "hail_positive.h"
+#include "hail_probable.h"
 #include "point.h"
 #include "point_feature.h"
 #include "barb.h"
@@ -39,6 +43,7 @@
 #include "v_vector.h"
 #include "d_radial.h"
 #include "circle.h"
+#include "mesocyclone.h"
 #include "text.h"
 #include "v_text.h"
 #include "storm_id.h"
@@ -78,11 +83,20 @@ char *parse_symbology_packet (char *buf, NIDS_symbology_packet *l) {
 			p = parse_point_feature_header(p, &(l->point_feature));
 			break;
 		
-		case POINT1:
-		case POINT2:
-		case POINT3:
-		case POINT4:
-			p = parse_point_header(p, &(l->point));
+		case TVS:
+			p = parse_tvs_header(p, &(l->tvs));
+			break;
+		
+		case ETVS:
+			p = parse_etvs_header(p, &(l->etvs));
+			break;
+		
+		case HAIL_POSITIVE:
+			p = parse_hail_positive_header(p, &(l->hail_positive));
+			break;
+		
+		case HAIL_PROBABLE:
+			p = parse_hail_probable_header(p, &(l->hail_probable));
 			break;
 		
 		case BARB:
@@ -109,8 +123,11 @@ char *parse_symbology_packet (char *buf, NIDS_symbology_packet *l) {
 			p = parse_v_vector_header(p, &(l->v_vector));
 			break;
 		
-		case CIRCLE1:
-		case CIRCLE2:
+		case MESOCYCLONE1:
+		case MESOCYCLONE2:
+			p = parse_mesocyclone_header(p, &(l->mesocyclone));
+			break;
+		
 		case CIRCLE3:
 			p = parse_circle_header(p, &(l->circle));
 			break;
@@ -185,6 +202,7 @@ char *parse_symbology_layer (char *buf, NIDS_symbology_layer *l) {
 	l->num_packets = 0;
 	
 	for (i = 0; p - buf + 6 < l->length; i++) {
+		
 		l->num_packets++;
 		
 		if (!(temp = realloc(l->packets, l->num_packets * sizeof(NIDS_symbology_packet))))
@@ -296,11 +314,20 @@ void free_symbology_packet (NIDS_symbology_packet *l) {
 			free_point_feature_header(&(l->point_feature));
 			break;
 		
-		case POINT1:
-		case POINT2:
-		case POINT3:
-		case POINT4:
-			free_point_header(&(l->point));
+		case TVS:
+			free_tvs_header(&(l->tvs));
+			break;
+		
+		case ETVS:
+			free_etvs_header(&(l->etvs));
+			break;
+		
+		case HAIL_POSITIVE:
+			free_hail_positive_header(&(l->hail_positive));
+			break;
+		
+		case HAIL_PROBABLE:
+			free_hail_probable_header(&(l->hail_probable));
 			break;
 		
 		case BARB:
@@ -327,8 +354,11 @@ void free_symbology_packet (NIDS_symbology_packet *l) {
 			free_v_vector_header(&(l->v_vector));
 			break;
 		
-		case CIRCLE1:
-		case CIRCLE2:
+		case MESOCYCLONE1:
+		case MESOCYCLONE2:
+			free_mesocyclone_header(&(l->mesocyclone));
+			break;
+		
 		case CIRCLE3:
 			free_circle_header(&(l->circle));
 			break;
@@ -360,7 +390,7 @@ void free_symbology_packet (NIDS_symbology_packet *l) {
 			break;
 		
 		default:
-			printf("unknown symbology layer %04x\n", l->data_type);
+			fprintf(stderr, "unknown symbology layer %04x\n", l->data_type);
 						 
 	}
 }
@@ -440,11 +470,20 @@ void print_symbology_packet (NIDS_symbology_packet *l, char *prefix) {
 			print_point_feature_header(&(l->point_feature), prefix);
 			break;
 		
-		case POINT1:
-		case POINT2:
-		case POINT3:
-		case POINT4:
-			print_point_header(&(l->point), prefix);
+		case TVS:
+			print_tvs_header(&(l->tvs), prefix);
+			break;
+		
+		case ETVS:
+			print_etvs_header(&(l->etvs), prefix);
+			break;
+		
+		case HAIL_POSITIVE:
+			print_hail_positive_header(&(l->hail_positive), prefix);
+			break;
+		
+		case HAIL_PROBABLE:
+			print_hail_probable_header(&(l->hail_probable), prefix);
 			break;
 		
 		case BARB:
@@ -471,8 +510,11 @@ void print_symbology_packet (NIDS_symbology_packet *l, char *prefix) {
 			print_v_vector_header(&(l->v_vector), prefix);
 			break;
 		
-		case CIRCLE1:
-		case CIRCLE2:
+		case MESOCYCLONE1:
+		case MESOCYCLONE2:
+			print_mesocyclone_header(&(l->mesocyclone), prefix);
+			break;
+					
 		case CIRCLE3:
 			print_circle_header(&(l->circle), prefix);
 			break;
@@ -504,7 +546,7 @@ void print_symbology_packet (NIDS_symbology_packet *l, char *prefix) {
 			break;
 		
 		default:
-			printf("unknown symbology layer 0x%04x\n", l->data_type);
+			fprintf(stderr, "unknown symbology layer 0x%04x\n", l->data_type);
 							 
 	}
 	
@@ -585,15 +627,24 @@ void product_symbology_packet_to_raster (
 			point_features_to_raster(im, &(l->point_feature));
 			break;
 		
-		case POINT1:
-		case POINT2:
-		case POINT3:
-		case POINT4:
-			//points_to_raster(im, &(l->point));
+		case TVS:
+			tvss_to_raster(im, &(l->tvs));
+			break;
+		
+		case ETVS:
+			etvss_to_raster(im, &(l->etvs));
+			break;
+		
+		case HAIL_POSITIVE:
+			hail_positives_to_raster(im, &(l->hail_positive));
+			break;
+		
+		case HAIL_PROBABLE:
+			hail_probables_to_raster(im, &(l->hail_probable));
 			break;
 		
 		case PRECIP:
-			//precips_to_raster(im, &(l->precip));
+			precips_to_raster(im, &(l->precip));
 			break;
 		
 		case VECTOR:
@@ -604,8 +655,12 @@ void product_symbology_packet_to_raster (
 			v_vectors_to_raster(im, &(l->v_vector));
 			break;
 		
-		case CIRCLE1:
-		case CIRCLE2:
+		case MESOCYCLONE1:
+		case MESOCYCLONE2:
+			mesocyclones_to_raster(im, &(l->mesocyclone));
+			break;
+		
+			
 		case CIRCLE3:
 			circles_to_raster(im, &(l->circle));
 			break;
@@ -645,7 +700,7 @@ void product_symbology_packet_to_raster (
 			break;
 		
 		default:
-			printf("unknown symbology layer %04x\n", l->data_type);
+			fprintf(stderr, "unknown symbology layer %04x\n", l->data_type);
 							 
 	}
 	
@@ -686,3 +741,4 @@ void product_symbology_to_raster(
 		product_symbology_layer_to_raster(im, s->layers + i);
 	
 }
+

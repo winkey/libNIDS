@@ -57,7 +57,9 @@ am_libNIDS_la_OBJECTS = msg_header.lo prod_desc.lo \
 	circle.lo product_dependent_desc.lo color.lo storm_id.lo \
 	forecast.lo linked_vector.lo graphic_alphanumeric.lo \
 	tabular_alphanumeric.lo v_linked_vector.lo v_text.lo \
-	d_precip.lo point.lo point_feature.lo hail.lo image.lo
+	d_precip.lo point.lo point_feature.lo hail.lo image.lo tvs.lo \
+	etvs.lo hail_positive.lo hail_probable.lo mesocyclone.lo \
+	proj.lo myzlib.lo
 libNIDS_la_OBJECTS = $(am_libNIDS_la_OBJECTS)
 libNIDS_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
@@ -131,6 +133,8 @@ PACKAGE_STRING = @PACKAGE_STRING@
 PACKAGE_TARNAME = @PACKAGE_TARNAME@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
+PROJ_INCLUDE = @PROJ_INCLUDE@
+PROJ_STATIC = @PROJ_STATIC@
 RANLIB = @RANLIB@
 SED = @SED@
 SET_MAKE = @SET_MAKE@
@@ -191,7 +195,8 @@ top_srcdir = @top_srcdir@
 INCLUDES = \
 	-DPACKAGE_LOCALE_DIR=\""$(prefix)/$(DATADIRNAME)/locale"\" \
 	-DPACKAGE_SRC_DIR=\""$(srcdir)"\" \
-	-DPACKAGE_DATA_DIR=\""$(datadir)"\" 
+	-DPACKAGE_DATA_DIR=\""$(datadir)"\" \
+	-DPACKAGE_PKG_DATA_DIR=\""$(pkgdatadir)"\"
 
 AM_CFLAGS = \
 	 -Wall\
@@ -257,11 +262,26 @@ libNIDS_la_SOURCES = \
 	hail.h       \
 	hail.c       \
 	image.c       \
-	image.h       
+	image.h       \
+	tvs.c       \
+	tvs.h       \
+	etvs.h       \
+	etvs.c       \
+	hail_positive.c       \
+	hail_positive.h       \
+	hail_probable.h       \
+	hail_probable.c       \
+	mesocyclone.c       \
+	mesocyclone.h       \
+	proj.c       \
+	myzlib.c       \
+	myzlib.h
 
 libNIDS_la_LDFLAGS = \
 	-lm           \
-	-lbz2
+	-lbz2           \
+	-lproj           \
+	-lz
 
 all: all-am
 
@@ -338,24 +358,31 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/color.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/d_precip.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/d_radial.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/etvs.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/forecast.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/graphic_alphanumeric.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hail.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hail_positive.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hail_probable.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/image.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/linked_vector.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/main.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mesocyclone.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/msg_header.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/myzlib.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/point.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/point_feature.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/precip.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/prod_desc.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/product_dependent_desc.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/product_symbology.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/proj.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/radial.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/raster.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/storm_id.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tabular_alphanumeric.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/text.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tvs.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/v_linked_vector.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/v_text.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/v_vector.Plo@am__quote@

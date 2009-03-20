@@ -108,6 +108,8 @@ PACKAGE_STRING = @PACKAGE_STRING@
 PACKAGE_TARNAME = @PACKAGE_TARNAME@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
+PROJ_INCLUDE = @PROJ_INCLUDE@
+PROJ_STATIC = @PROJ_STATIC@
 RANLIB = @RANLIB@
 SED = @SED@
 SET_MAKE = @SET_MAKE@
@@ -166,7 +168,8 @@ target_alias = @target_alias@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 include_HEADERS = \
-	NIDS.h
+	NIDS.h   \
+	NIDS_proj.h
 
 EXTRA_DIST = \
 	$(include_HEADERS)

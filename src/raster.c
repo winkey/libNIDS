@@ -244,8 +244,8 @@ void rasters_to_raster (
 {
 	int i;
 	
-	im->x_center = r->x_start;
-	im->y_center = r->y_start;
+	im->x_center = im->width / 2 - r->num_rows / 2;
+	im->y_center = im->height / 2 - r->num_rows / 2;
 	
 	for (i = 0 ; i < r->num_rows ; i++)
 		row_to_raster(r->rows + i, im, i);

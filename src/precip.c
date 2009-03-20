@@ -25,6 +25,7 @@
 
 #include "../include/NIDS.h"
 #include "get.h"
+#include "image.h"
 #include "precip.h"
 #include "error.h"
 
@@ -185,3 +186,49 @@ void print_precip_header(NIDS_precip *r, char *prefix) {
 		print_precip_row(r->rows + i, prefix, i);
 	
 }
+
+/*******************************************************************************
+	function to convert a single row to a raster
+*******************************************************************************/
+
+void precip_to_raster (NIDS_precip_row *r, NIDS_image *im, int row) {
+	int x = 0, y = row;
+	int i, j;
+
+	
+	for (i = 0 ; i < r->num_rle ; i++) {
+		for (j = 0 ; j < r->run[i] ; j++) {
+			plot(im, x, y, r->code[i]);
+		x++;
+		}
+	}
+	
+}
+
+/*******************************************************************************
+	function to convert a raster to a raster
+
+args:
+						r				the structure that holds the radials
+						width		pointer to return the width of the raster in
+						height	pointer to return the height of the raster in
+
+returns:
+						a char pointer to the raster data
+
+*******************************************************************************/
+
+void precips_to_raster (
+	NIDS_image *im,
+	NIDS_precip *r)
+{
+	int i;
+	
+	im->x_center = im->width / 2 - r->num_rows / 2;
+	im->y_center = im->height / 2 - r->num_rows / 2;
+	
+	for (i = 0 ; i < r->num_rows ; i++)
+		precip_to_raster(r->rows + i, im, i);
+	
+}
+

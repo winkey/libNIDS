@@ -1,6 +1,7 @@
 
 include_HEADERS = \
-	NIDS.h
+	NIDS.h   \
+	NIDS_proj.h
 
 EXTRA_DIST = \
 	$(include_HEADERS)

@@ -119,16 +119,15 @@ void free_point_header(NIDS_points *p) {
 args:
 						p				the structure the point is stored in
 						prefix	the start of the line
-						rn			the point number
 
 returns:
 						nothing
 *******************************************************************************/
 
-void print_point(NIDS_point *p, char *prefix, int rn) {
+void print_point(NIDS_point *p, char *prefix) {
 	
-	printf("%s.point.points[%i].x_start %i\n", prefix, rn, p->x_start);
-	printf("%s.point.points[%i].y_start %i\n", prefix, rn, p->y_start);
+	printf("%s.x_start %i\n", prefix, p->x_start);
+	printf("%s.y_start %i\n", prefix, p->y_start);
 	
 }
 	
@@ -145,11 +144,15 @@ returns:
 
 void print_point_header(NIDS_points *p, char *prefix) {
 	int i;
+	char myprefix[PREFIX_LEN];
 	
 	printf("%s.point.length %i\n", prefix, p->length);
 	printf("%s.point.num_points %i\n", prefix, p->num_points);
 	
-	for (i = 0 ; i < p->num_points ; i++)
-		print_point(p->points + i, prefix, i);
+	for (i = 0 ; i < p->num_points ; i++) {
+		snprintf(myprefix, PREFIX_LEN, "%s.point.points[%i]", prefix, i);
+		print_point(p->points + i, myprefix);
+	}
 	
 }
+
