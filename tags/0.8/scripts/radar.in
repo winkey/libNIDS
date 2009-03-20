@@ -1,0 +1,237 @@
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Library General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor Boston, MA 02110-1301,  USA
+
+
+
+source /etc/profile
+
+srs="+proj=latlong +datum=WGS84"
+
+station=$5
+prod=$2
+
+##### time #####
+
+period=10
+
+unixtime=$(date -u -d "${3} ${4}" +%s)
+time=$(date -u -d @$unixtime "+%Y-%m-%dT%H:%M")
+newfdate=$(date -u -d @$unixtime "+%Y%m%d.%H%M")
+
+##### dirs #####
+
+wwwdisk="@wwwdisk@/radar"
+kmldisk="@wwwdisk@/kml/radar"
+www="@www@"
+wwwkml="@www@/kml/radar"
+
+if [[ ! -d "$wwwdisk" ]]
+then
+	mkdir -p "$wwwdisk"
+fi
+
+if [[ ! -d "$kmldisk" ]]
+then
+	mkdir -p "$kmldisk"
+fi
+
+##### files #####
+
+prodlower=`echo "$prod" | tr [A-Z] [a-z]`
+
+nids="$1"
+
+tmpkml="/tmp/${prod}.kml"
+kml="$kmldisk/${prod}.kml"
+
+tiff="/tmp/${prod}.${3}.${4}.${station}.tiff"
+warp="$wwwdisk/${prod}.$newfdate.${station}.tiff"
+basewarp=$(basename "$warp")
+
+tmp_tindex="/tmp/${prod}"
+tindex="$wwwdisk/${prod}"
+sqltindex="/tmp/${prod}.sqlite"
+
+mapfile="$wwwdisk/${prod}.map"
+
+##### decode #####
+
+
+nice -n 5 NIDS2gdal -g "$nids" -o "$tiff"
+
+##### warp #####
+
+nice -n 5 gdalwarp -dstnodata 0 -co TILED=YES -t_srs "$srs" "$tiff" "$warp"
+
+if [[ -f "$tiff" ]]
+then
+	rm "$tiff"
+fi
+
+##### tileindex #####
+
+cd "${wwwdisk}/"
+
+lastimg=$(ogrinfo "$prod.shp" $prodlower |\
+					 grep -e $d -A2 |\
+					 tail -n 3 |\
+					 grep -e location |\
+					 sed 's/.*= //')
+
+difftime=$(($unixtime - $lasttime))
+
+if [[ "$difftime" -gt "$period" ]]
+then
+	difftime=$period
+fi
+
+##### does the db need setup? #####
+
+if createdb radar
+then
+	createlang plpgsql radar
+	psql -d radar -f /usr/share/lwpostgis.sql
+	psql -d radar -f /usr/share/spatial_ref_sys.sql
+fi
+
+psql radar -c "CREATE TABLE $prodlower (ogc_fid integer, \
+															wkb_geometry geometry, \
+															location character(512), \
+															time timestamp);"
+
+##### if there is already a image for this station dupe #####
+
+if lasttime=$(psql -d radar -c "SELECT time from $prodlower \
+																	WHERE location LIKE '%${station}%' \
+																	ORDER BY time desc \
+																	LIMIT 1;")
+then
+	
+	for t in `seq $(($(date "+%s" -d "$lasttime UTC") + 60)) 60 $unixtime`
+	do
+		psql -d radar -f -c "INSERT INTO $prodlower (wkb_geometry, location, time) \
+													SELECT wkb_geometry, location, time + interval '1 minutes' \
+														FROM radar \
+														WHERE location \
+														LIKE '%${station}%' \
+														ORDER BY time desc \
+														LIMIT 1;"
+	done
+fi
+
+##### add the tindex for this image #####
+
+gdaltindex "$tmp_tindex.shp" "$warp"
+ogr2ogr -update -append -f PostgreSQL PG:dbname=radar "$tmp_tindex.shp"
+
+##### add the timestamp to the new tindex #####
+
+psql -d radar -f -c "UPDATE $prodlower SET \
+											time = '$time' \
+											WHERE location = '$warp';"
+
+
+if [[ -f "$tmp_tindex.shp" ]]
+then
+        rm "$tmp_tindex.shp"
+        rm "$tmp_tindex.dbf"
+        rm "$tmp_tindex.shx"
+fi
+
+##### mapfile #####
+
+starttime=$(ogrinfo -q -fid 0 $2.shp $prodlower |\
+             grep -e 'time (String)' |\
+             sed 's/.*= //' |\
+             tr " " "T")
+
+
+echo "# raster layer" > "$mapfile"
+echo "  LAYER" >> "$mapfile"
+echo "    NAME 'Radar_${2}'" >> "$mapfile"
+echo "    TYPE RASTER" >> "$mapfile"
+echo "    STATUS ON" >> "$mapfile"
+echo "    DUMP TRUE" >> "$mapfile"
+echo "    PROJECTION" >> "$mapfile"
+echo "     'proj=longlat'" >> "$mapfile"
+echo "     'ellps=WGS84'" >> "$mapfile"
+echo "     'datum=WGS84'" >> "$mapfile"
+echo "     'no_defs'" >> "$mapfile"
+echo "     ''" >> "$mapfile"
+echo "    END" >> "$mapfile"
+echo "    METADATA" >> "$mapfile"
+echo "      'wms_title'        '$2'" >> "$mapfile"
+echo "      'wms_srs'          'EPSG:900913 EPSG:4326'" >> "$mapfile"
+echo "      'wms_extent'       '-180 -90 180 90'" >> "$mapfile"
+echo "      'wms_timeextent'   '${starttime}Z/${time}Z/P1M'" >> "$mapfile"
+echo "      'wms_timeitem'     'time'" >> "$mapfile"
+echo "      'wms_timedefault'  '$time'" >> "$mapfile"
+echo "    END" >> "$mapfile"
+echo "    OFFSITE 0 0 0" >> "$mapfile"
+echo "    TILEINDEX '$2.shp'" >> "$mapfile"
+echo "  END" >> "$mapfile"
+
+
+##### kml #####
+
+part1="${www}/cgi-bin/rad_wms?SERVICE=WMS&amp;VERSION=1.1.1"
+part2="&amp;REQUEST=GetMap&amp;SRS=EPSG:4326"
+part3="&amp;LAYERS=Radar_$2"
+part4="&amp;TRANSPARENT=TRUE&amp;FORMAT=image/png"
+part5="&amp;time=$time"
+
+if [[ "$(grep "$kml" -e "<begin>${time}Z</begin>")" = "" ]]
+then
+
+	echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" > $tmpkml
+	echo "<kml xmlns=\"http://earth.google.com/kml/2.2\">" >> $tmpkml
+	echo "<Document>" >> $tmpkml
+	echo "<GroundOverlay id='1'>" >> $tmpkml
+	echo "	<Icon>" >> $tmpkml
+	echo "		<href>${part1}${part2}${part3}${part4}${part5}</href>" >> $tmpkml
+	echo "		<viewRefreshMode>onStop</viewRefreshMode>" >> $tmpkml
+	echo "		<viewRefreshTime>1</v/usr/lib/libgdaliewRefreshTime>" >> $tmpkml
+	echo "		<viewFormat>" >> $tmpkml
+	echo "			BBOX=[bboxWest],[bboxSouth],[bboxEast],[bboxNorth]&amp;WIDTH=[horizPixels]&amp;HEIGHT=[vertPixels]" >> $tmpkml
+	echo "		</viewFormat>" >> $tmpkml
+	echo "	</Icon>" >> $tmpkml
+	echo "	<TimeSpan>" >> $tmpkml
+	echo "		<begin>${time}Z</begin>" >> $tmpkml
+	echo "		<end>${endtime}Z</end>" >> $tmpkml
+	echo "	</TimeSpan>" >> $tmpkml
+	echo "</GroundOverlay>" >> $tmpkml
+
+	if [[ -f $kml ]]
+	then
+		for i in $( seq 1 $(( $(( 24 * 60 )) / $period + 1 )) )
+		do
+			grep $kml -A13 -e "<GroundOverlay id=.${i}.>" |\
+			 sed "s/GroundOverlay id='${i}'/GroundOverlay id='$(($i + 1))'/" >> $tmpkml
+		done
+	fi
+
+	echo "</Document>" >> $tmpkml
+	echo "</kml>" >> $tmpkml
+
+	mv -f "$tmpkml" "$kml"
+
+fi
+
+##### cleanup old #####
+
+
+find "$wwwdisk/" -mmin +180 -name "*.tiff" -exec rm -f {} \;
+
+
+
