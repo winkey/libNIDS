@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://earth.google.com/kml/2.2">
+<Folder>
+	<name>Radar Imagery</name>
+	<Style>
+		<ListStyle>
+			<listItemType>radioFolder</listItemType>
+			<bgColor>00ffffff</bgColor>
+		</ListStyle>
+	</Style>
+	<Folder>
+		<name>off</name>
+	</Folder>
+	<NetworkLink>
+		<name>N0R</name>
+		<visibility>0</visibility>
+		<Link>
+			<href>@www@/kml/radar/N0R.kml?</href>
+			<viewRefreshMode>onStop</viewRefreshMode>
+			<viewRefreshTime>0</viewRefreshTime>
+		</Link>
+	</NetworkLink>
+</Folder>
+</kml>
