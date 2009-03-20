@@ -105,7 +105,7 @@ int main (int argc, char **argv) {
 	
 	out_DS = gdal_create(format, outfile, width, height);
 	
-	out_SRS = set_projection(out_DS, &data, width / 2, height / 2 );
+	out_SRS = set_projection(out_DS, &data, width / 2, height / 2, data.info->xres, data.info->yres );
 	
 	r_Band = get_band(out_DS, 1);
 	g_Band = get_band(out_DS, 2);

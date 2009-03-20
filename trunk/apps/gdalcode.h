@@ -37,7 +37,9 @@ OGRSpatialReferenceH set_projection(
 	GDALDatasetH *hDS,
 	NIDS *data,
 	int offx,
-	int offy);
+	int offy,
+	double xres,
+	double yres);
 
 /*******************************************************************************
 	function to get the raster band

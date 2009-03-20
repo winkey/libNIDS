@@ -32,8 +32,7 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-bin_PROGRAMS = nids2raster$(EXEEXT) nidsinfo$(EXEEXT) \
-	NIDS2gdal$(EXEEXT)
+bin_PROGRAMS = nidsinfo$(EXEEXT) NIDS2gdal$(EXEEXT)
 subdir = apps
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -52,9 +51,6 @@ NIDS2gdal_LDADD = $(LDADD)
 NIDS2gdal_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(NIDS2gdal_LDFLAGS) $(LDFLAGS) -o $@
-nids2raster_SOURCES = nids2raster.c
-nids2raster_OBJECTS = nids2raster.$(OBJEXT)
-nids2raster_LDADD = $(LDADD)
 am_nidsinfo_OBJECTS = nidsinfo.$(OBJEXT)
 nidsinfo_OBJECTS = $(am_nidsinfo_OBJECTS)
 nidsinfo_LDADD = $(LDADD)
@@ -73,8 +69,8 @@ CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
-SOURCES = $(NIDS2gdal_SOURCES) nids2raster.c $(nidsinfo_SOURCES)
-DIST_SOURCES = $(NIDS2gdal_SOURCES) nids2raster.c $(nidsinfo_SOURCES)
+SOURCES = $(NIDS2gdal_SOURCES) $(nidsinfo_SOURCES)
+DIST_SOURCES = $(NIDS2gdal_SOURCES) $(nidsinfo_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -272,9 +268,6 @@ clean-binPROGRAMS:
 NIDS2gdal$(EXEEXT): $(NIDS2gdal_OBJECTS) $(NIDS2gdal_DEPENDENCIES) 
 	@rm -f NIDS2gdal$(EXEEXT)
 	$(NIDS2gdal_LINK) $(NIDS2gdal_OBJECTS) $(NIDS2gdal_LDADD) $(LIBS)
-nids2raster$(EXEEXT): $(nids2raster_OBJECTS) $(nids2raster_DEPENDENCIES) 
-	@rm -f nids2raster$(EXEEXT)
-	$(LINK) $(nids2raster_OBJECTS) $(nids2raster_LDADD) $(LIBS)
 nidsinfo$(EXEEXT): $(nidsinfo_OBJECTS) $(nidsinfo_DEPENDENCIES) 
 	@rm -f nidsinfo$(EXEEXT)
 	$(nidsinfo_LINK) $(nidsinfo_OBJECTS) $(nidsinfo_LDADD) $(LIBS)
@@ -287,7 +280,6 @@ distclean-compile:
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/NIDS2gdal.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gdalcode.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/nids2raster.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/nidsinfo.Po@am__quote@
 
 .c.o:

@@ -41,6 +41,22 @@ typedef struct {
 } prod_dep_desc;
 
 /*******************************************************************************
+	Product Description
+*******************************************************************************/
+
+typedef struct {
+	int code;
+	int ntr;
+	char name[100];
+	double xres;
+	double yres;
+	double dres;
+	int range;
+	int numlevels;
+	char formats[100];
+} NIDS_prod_info;
+
+/*******************************************************************************
 	Product Description Block
 *******************************************************************************/
 
@@ -540,6 +556,7 @@ typedef struct {
 
 typedef struct {
 	NIDS_msg_header msg;
+	NIDS_prod_info *info; /**** we need to change this, its different *****/
 	NIDS_prod_desc prod;
 	prod_dep_desc pdd;
 	NIDS_product_symbology symb;

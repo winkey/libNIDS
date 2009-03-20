@@ -59,7 +59,7 @@ am_libNIDS_la_OBJECTS = msg_header.lo prod_desc.lo \
 	tabular_alphanumeric.lo v_linked_vector.lo v_text.lo \
 	d_precip.lo point.lo point_feature.lo hail.lo image.lo tvs.lo \
 	etvs.lo hail_positive.lo hail_probable.lo mesocyclone.lo \
-	proj.lo myzlib.lo
+	proj.lo myzlib.lo prod_info.lo
 libNIDS_la_OBJECTS = $(am_libNIDS_la_OBJECTS)
 libNIDS_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
@@ -275,7 +275,9 @@ libNIDS_la_SOURCES = \
 	mesocyclone.h       \
 	proj.c       \
 	myzlib.c       \
-	myzlib.h
+	myzlib.h       \
+	prod_info.c       \
+	prod_info.h
 
 libNIDS_la_LDFLAGS = \
 	-lm           \
@@ -374,6 +376,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/point_feature.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/precip.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/prod_desc.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/prod_info.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/product_dependent_desc.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/product_symbology.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/proj.Plo@am__quote@

@@ -142,11 +142,16 @@ OGRSpatialReferenceH set_projection(
 	GDALDatasetH *hDS,
 	NIDS *data,
 	int offx,
-	int offy)
+	int offy,
+	double xres,
+	double yres)
 {
 	OGRSpatialReferenceH hSRS = OSRNewSpatialReference(NULL);
 	OGRSpatialReferenceH hSrsSRS = OSRNewSpatialReference(NULL);
 	double MinX, MinY, Dx, Dy, Ny, Nx, MaxX, MaxY;
+	
+	xres *= 1852;
+	yres *= 1852;
 	
 	OSRSetWellKnownGeogCS(hSRS, "WGS84");
 	OSRSetWellKnownGeogCS(hSrsSRS, "WGS84");
@@ -158,7 +163,7 @@ OGRSpatialReferenceH set_projection(
 	
 	
 	transform_origin(hSrsSRS, hSRS, &MinX, &MinY);
-	set_geotransform(hDS, MinX - 250.0 * offx, 250.0, 0, MinY + 250.0 * offy, -250.0, 0);
+	set_geotransform(hDS, MinX - xres * offx, xres, 0, MinY + yres * offy, -yres, 0);
 	
 	
 
