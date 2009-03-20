@@ -27,6 +27,9 @@
 
 #include "gdalcode.h"
 
+
+	
+
 int main (int argc, char **argv) {
 	FILE *NIDS_fp;
 	
@@ -38,6 +41,7 @@ int main (int argc, char **argv) {
 	int width = 0, height = 0;
 	NIDS data = {};
 	char *rast = NULL;
+	char *scalename = NULL;
 	
 	NIDS_color *colors = NULL;
 	
@@ -59,7 +63,7 @@ int main (int argc, char **argv) {
 	
 	int opt;
 	
-	while (0 < (opt = getopt(argc, argv, "n:f:o:h"))) {
+	while (0 < (opt = getopt(argc, argv, "n:f:o:s:h"))) {
 		
 		switch (opt) {
 			case 'n':
@@ -72,6 +76,10 @@ int main (int argc, char **argv) {
 			
 			case 'o':
 				outfile = optarg;
+				break;
+			
+			case 's':
+				scalename = optarg;
 				break;
 			/*
 			case 't':
@@ -97,6 +105,7 @@ int main (int argc, char **argv) {
 	
 	NIDS_fp = NIDS_open(nidsfile);
 	NIDS_read(NIDS_fp, &data);
+	printf("data.info=%x", data.info);
 	
 	rast = NIDS_to_raster(&data, &width, &height);
 	
@@ -105,6 +114,7 @@ int main (int argc, char **argv) {
 	
 	out_DS = gdal_create(format, outfile, width, height);
 	
+	printf ("xres=%lg yres=%lg\n", data.info->xres, data.info->yres);
 	out_SRS = set_projection(out_DS, &data, width / 2, height / 2, data.info->xres, data.info->yres );
 	
 	r_Band = get_band(out_DS, 1);
@@ -112,8 +122,11 @@ int main (int argc, char **argv) {
 	b_Band = get_band(out_DS, 3);
 	a_Band = get_band(out_DS, 4);
 	
-	get_product_dependent_color(data.msg.code, &colors);
-	
+	if (!scalename)
+		get_product_dependent_color(data.msg.code, &colors);
+	else
+		colors = color_getscale(scalename);
+
 	/***** alocate line memmory *****/
 	
 	if (!(rline = malloc(width * sizeof(unsigned char))))
@@ -131,8 +144,12 @@ int main (int argc, char **argv) {
 	for (i = 0; i < height; i++) {
 		for (j = 0; j < width ; j++) {
 						
-			sscanf(colors[(unsigned char)rast[i * width + j]].color, "%2x%2x%2x",
-						 &r, &g, &b);
+			if (!scalename)
+				sscanf(colors[(unsigned char)rast[i * width + j]].color, "%2x%2x%2x",
+							 &r, &g, &b);
+			else
+				sscanf(color_checkscale(colors, data.prod.thresholds[rast[i * width + j]]),
+							 "%2x%2x%2x", &r, &g, &b);
 			
 			if (rast[i * width + j])
 				a = 255;

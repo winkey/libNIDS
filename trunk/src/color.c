@@ -75,12 +75,12 @@ NIDS_color *color_getscale(
 			}
 		}
 		
-		if (2 == sscanf(line, "%9[-0-9NCDRF] %6[0-9a-fA-F]", (scales[used]).value, (scales[used]).color)) {
+		if (2 == sscanf(line, "%f %6[0-9a-fA-F]", &((scales[used]).value), (scales[used]).color)) {
 			scales[used].color[6] = 0;
 			used++;
 		}
 		
-		*(scales[used].value) = 0;
+		scales[used].value = 0;
 		scales[used].color[0] = 0;
 
 	}
@@ -211,5 +211,28 @@ void get_product_dependent_color(int msgcode, NIDS_color **result) {
 	return;
 }
 	
+/*******************************************************************************
+	function to get a color from a scale
+
+	args:
+							scales			the scale to check
+							value				the value to check for in the scale
+
+	returns:
+							the color for the value
+*******************************************************************************/
+ 
+char *color_checkscale(
+	NIDS_color *scales,
+	float value)
+{
+	NIDS_color *scale;
+	
+	for (scale = scales ;
+			 value > scale->value && *((scale + 1)->color) != 0;
+			 scale++);
+	
+	return scale->color;
+}
 
 

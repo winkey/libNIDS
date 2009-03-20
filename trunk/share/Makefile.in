@@ -114,6 +114,8 @@ SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 STRIP = @STRIP@
 VERSION = @VERSION@
+WWW = @WWW@
+WWWDISK = @WWWDISK@
 abs_builddir = @abs_builddir@
 abs_srcdir = @abs_srcdir@
 abs_top_builddir = @abs_top_builddir@
@@ -177,7 +179,8 @@ dist_pkgdata_DATA = \
   3bit_vwp.scale \
   4bit_echotops.scale \
   4bit_precip.scale \
-  4bit_shear.scale
+  4bit_shear.scale \
+  n0r.scale
 
 all: all-am
 

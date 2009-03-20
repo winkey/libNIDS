@@ -107,6 +107,8 @@ SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 STRIP = @STRIP@
 VERSION = @VERSION@
+WWW = @WWW@
+WWWDISK = @WWWDISK@
 abs_builddir = @abs_builddir@
 abs_srcdir = @abs_srcdir@
 abs_top_builddir = @abs_top_builddir@
@@ -161,11 +163,13 @@ top_srcdir = @top_srcdir@
 www = @WWW@
 wwwdisk = @WWWDISK@
 bin_SCRIPTS = \
-	radar.sh
+	radar.sh \
+	makekey2.sh
 
 CLEANFILES = $(bin_SCRIPTS)
 EXTRA_DIST = \
-	radar.in
+	radar.in \
+	makekey2.in
 
 do_subst = sed -e 's,[@]bindir[@],$(bindir),g' \
 							 -e 's,[@]wwwdisk[@],$(wwwdisk),g' \
@@ -365,6 +369,10 @@ uninstall-am: uninstall-binSCRIPTS
 radar.sh: radar.in Makefile
 	$(do_subst) < $(srcdir)/radar.in > radar.sh
 	chmod +x radar.sh
+
+makekey2.sh: makekey2.in Makefile
+	$(do_subst) < $(srcdir)/makekey2.in > makekey2.sh
+	chmod +x makekey2.sh
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

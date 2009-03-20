@@ -35,6 +35,7 @@
 #include "color.h"
 #include "error.h"
 #include "myzlib.h"
+#include "prod_info.h"
 
 
 

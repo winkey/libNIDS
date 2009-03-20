@@ -13,4 +13,6 @@ dist_pkgdata_DATA = \
   3bit_vwp.scale \
   4bit_echotops.scale \
   4bit_precip.scale \
-  4bit_shear.scale
+  4bit_shear.scale \
+  n0r.scale
+  

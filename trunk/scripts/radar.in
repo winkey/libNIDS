@@ -1,4 +1,4 @@
-
+#!/bin/bash
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
@@ -50,7 +50,7 @@ fi
 
 ##### files #####
 
-prodlower=`echo "$prod" | tr [A-Z] [a-z]`
+prodlower=$(echo "$prod" | tr [A-Z] [a-z])
 
 nids="$1"
 
@@ -83,15 +83,16 @@ then
 	rm "$tiff"
 fi
 
+##### lock #####
+
+while ! mkdir "/tmp/${prod}.lock"
+do
+	sleep 1
+done
+
 ##### tileindex #####
 
 cd "${wwwdisk}/"
-
-lastimg=$(ogrinfo "$prod.shp" $prodlower |\
-					 grep -e $d -A2 |\
-					 tail -n 3 |\
-					 grep -e location |\
-					 sed 's/.*= //')
 
 ##### does the db need setup? #####
 
@@ -100,7 +101,9 @@ then
 	createlang plpgsql radar
 	psql -d radar -f /usr/share/lwpostgis.sql
 	psql -d radar -f /usr/share/spatial_ref_sys.sql
+	
 	psql -d radar -c "ALTER TABLE $prodlower ADD time timestamp;"
+	psql -d radar -c "create index idx_time on $prodlower (time);"
 fi
 
 
@@ -114,8 +117,14 @@ lasttime=$(psql -d radar -t -c "SELECT time from $prodlower \
 
 if [[ "$lasttime" != "" ]]  && [[ $(($(date "+%s" -d "$lasttime UTC") + 60)) -lt "$unixtime" ]]
 then
-	echo $lasttime $(($(date "+%s" -d "$lasttime UTC") + 60)) $unixtime
-	for t in `seq $(($(date "+%s" -d "$lasttime UTC") + 60)) 60 $(($unixtime - 60))`
+  dupestart=$(($(date "+%s" -d "$lasttime UTC") + 60))
+  dupeend=$(($unixtime - 60))
+  if [[ "$(($dupestart + 600))" -lt "$dupeend" ]]
+  then
+		dupeend=$(($dupestart + 600))
+	fi
+
+	for t in `seq $dupestart 60 $dupeend`
 	do
 		psql -d radar -c "INSERT INTO $prodlower (wkb_geometry, location, time) \
 													SELECT wkb_geometry, location, time + interval '1 minutes' \
@@ -130,15 +139,15 @@ fi
 ##### add the tindex for this image #####
 
 gdaltindex "$tmp_tindex.shp" "$warp"
+psql -d radar -c "create index idx_time on $prodlower (time);"
 ogr2ogr -update -append -a_srs "EPSG:4326" -f PostgreSQL PG:dbname=radar "$tmp_tindex.shp"
 
 ##### add the timestamp to the new tindex #####
 
-psql -d radar -c "ALTER TABLE $prodlower ADD time timestamp;"
-psql -d radar -c "UPDATE $prodlower SET \
-											time = '$time' \
-											WHERE location = '$warp';"
-
+if psql -d radar -c "ALTER TABLE $prodlower ADD time timestamp;"
+then
+	psql -d radar -c "UPDATE $prodlower SET time = '$time' WHERE location = '$warp';"
+fi
 
 if [[ -f "$tmp_tindex.shp" ]]
 then
@@ -148,57 +157,60 @@ then
 fi
 
 
+
 ##### mapfile #####
 
-starttime=$(ogrinfo -q -fid 1 -ro PG:dbname=radar n0r |\
-						 grep -e 'time (DateTime)' |\
-						 sed 's/.*= //' |\
-						 tr " " "T" |\
-						 tr "/" "-")
+starttime=$(psql radar -q -P tuples_only -c "select time \
+                                               FROM n0r \
+                                               ORDER BY time asc \
+                                               LIMIT 1;" | sed 's/ /T/')
 
-echo "# polygon layer" > "$mapfile"
-echo "  LAYER" >> "$mapfile"
-echo "    NAME 'Radar_${2}_idx'" >> "$mapfile"
-echo "    TYPE POLYGON" >> "$mapfile"
-echo "    STATUS ON" >> "$mapfile"
-echo "    DATA 'wkb_geometry FROM ${prodlower} using unique wkb_geometry'" >> "$mapfile"
-echo "    METADATA" >> "$mapfile"
-echo "      'wms_title'        '$2'" >> "$mapfile"
-echo "      'wms_srs'          'EPSG:900913 EPSG:4326'" >> "$mapfile"
-echo "      'wms_extent'       '-180 -90 180 90'" >> "$mapfile"
-echo "      'wms_timeextent'   '${starttime}Z/${time}:00Z/P1M'" >> "$mapfile"
-echo "      'wms_timeitem'     'time'" >> "$mapfile"
-echo "      'wms_timedefault'  '${time}:00'" >> "$mapfile"
-echo "    END" >> "$mapfile"
-echo "    CONNECTION 'dbname=radar'" >> "$mapfile"
-echo "    CONNECTIONTYPE postgis" >> "$mapfile"
-echo "  END" >> "$mapfile"
-echo >> "$mapfile"
-echo "# raster layer" >> "$mapfile"
-echo "  LAYER" >> "$mapfile"
-echo "    NAME 'Radar_${2}'" >> "$mapfile"
-echo "    TYPE RASTER" >> "$mapfile"
-echo "    STATUS ON" >> "$mapfile"
-echo "    DUMP TRUE" >> "$mapfile"
-echo "    PROJECTION" >> "$mapfile"
-echo "     'proj=longlat'" >> "$mapfile"
-echo "     'ellps=WGS84'" >> "$mapfile"
-echo "     'datum=WGS84'" >> "$mapfile"
-echo "     'no_defs'" >> "$mapfile"
-echo "     ''" >> "$mapfile"
-echo "    END" >> "$mapfile"
-echo "    METADATA" >> "$mapfile"
-echo "      'wms_title'        '$2'" >> "$mapfile"
-echo "      'wms_srs'          'EPSG:900913 EPSG:4326'" >> "$mapfile"
-echo "      'wms_extent'       '-180 -90 180 90'" >> "$mapfile"
-echo "      'wms_timeextent'   '${starttime}Z/${time}:00Z/P1M'" >> "$mapfile"
-echo "      'wms_timeitem'     'time'" >> "$mapfile"
-echo "      'wms_timedefault'  '${time}:00'" >> "$mapfile"
-echo "    END" >> "$mapfile"
-#echo "    OFFSITE 0 0 0" >> "$mapfile"
-echo "    TILEITEM 'location'" >> "$mapfile"
-echo "    TILEINDEX 'Radar_${2}_idx'" >> "$mapfile"
-echo "  END" >> "$mapfile"
+
+cat > "$mapfile" <<EOF
+# polygon layer
+  LAYER
+    NAME 'Radar_${2}_idx'
+    TYPE POLYGON
+    STATUS ON
+    DATA 'wkb_geometry FROM ${prodlower} using unique wkb_geometry'
+    METADATA
+      'wms_title'        '$2'
+      'wms_srs'          'EPSG:900913 EPSG:4326'
+      'wms_extent'       '-180 -90 180 90'
+      'wms_timeextent'   '${starttime}Z/${time}:00Z/P1M'
+      'wms_timeitem'     'time'
+      'wms_timedefault'  '${time}:00'
+    END
+    CONNECTION 'dbname=radar'
+    CONNECTIONTYPE postgis
+  END
+
+# raster layer
+  LAYER
+    NAME 'Radar_${2}'
+    TYPE RASTER
+    STATUS ON
+    DUMP TRUE
+    PROJECTION
+     'proj=longlat'
+     'ellps=WGS84'
+     'datum=WGS84'
+     'no_defs'
+     ''
+    END
+    METADATA
+      'wms_title'        '$2'
+      'wms_srs'          'EPSG:900913 EPSG:4326'
+      'wms_extent'       '-180 -90 180 90'
+      'wms_timeextent'   '${starttime}Z/${time}:00Z/P1M'
+      'wms_timeitem'     'time'
+      'wms_timedefault'  '${time}:00'
+    END
+#    OFFSITE 0 0 0
+    TILEITEM 'location'
+    TILEINDEX 'Radar_${2}_idx'
+  END
+EOF
 
 ##### kml #####
 
@@ -211,42 +223,50 @@ part5="&amp;time=$time"
 if [[ "$(grep "$kml" -e "<begin>${time}:00Z</begin>")" = "" ]]
 then
 
-	echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" > $tmpkml
-	echo "<kml xmlns=\"http://earth.google.com/kml/2.2\">" >> $tmpkml
-	echo "<Document>" >> $tmpkml
-	echo "<GroundOverlay id='1'>" >> $tmpkml
-	echo "	<Icon>" >> $tmpkml
-	echo "		<href>${part1}${part2}${part3}${part4}${part5}</href>" >> $tmpkml
-	echo "		<viewRefreshMode>onStop</viewRefreshMode>" >> $tmpkml
-	echo "		<viewRefreshTime>1</viewRefreshTime>" >> $tmpkml
-	echo "		<viewFormat>" >> $tmpkml
-	echo "			BBOX=[bboxWest],[bboxSouth],[bboxEast],[bboxNorth]&amp;WIDTH=[horizPixels]&amp;HEIGHT=[vertPixels]" >> $tmpkml
-	echo "		</viewFormat>" >> $tmpkml
-	echo "	</Icon>" >> $tmpkml
-	echo "	<TimeSpan>" >> $tmpkml
-	echo "		<begin>${time}:00Z</begin>" >> $tmpkml
-	echo "		<end>${endtime}:00Z</end>" >> $tmpkml
-	echo "	</TimeSpan>" >> $tmpkml
-	echo "</GroundOverlay>" >> $tmpkml
-
-	if [[ -f $kml ]]
-	then
-		for i in $( seq 1 179)
-		do
-			grep $kml -A13 -e "<GroundOverlay id=.${i}.>" |\
-			 sed "s/GroundOverlay id='${i}'/GroundOverlay id='$(($i + 1))'/" >> $tmpkml
-		done
-	fi
-
-	echo "</Document>" >> $tmpkml
-	echo "</kml>" >> $tmpkml
+	cat > $tmpkml <<EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://earth.google.com/kml/2.2">
+<Document>
+<GroundOverlay id='1'>
+  <Icon>
+    <href>${part1}${part2}${part3}${part4}${part5}</href>
+    <viewRefreshMode>onStop</viewRefreshMode>
+    <viewRefreshTime>1</viewRefreshTime>
+    <viewFormat>
+      BBOX=[bboxWest],[bboxSouth],[bboxEast],[bboxNorth]&amp;WIDTH=[horizPixels]&amp;HEIGHT=[vertPixels]
+    </viewFormat>
+  </Icon>
+  <TimeSpan>
+    <begin>${time}:00Z</begin>
+    <end>${endtime}:00Z</end>
+  </TimeSpan>
+</GroundOverlay>
+$(
+  if [[ -f $kml ]]
+  then
+    kmldata=$(cat $kml)
+    for i in $( seq 1 179)
+    do
+      echo "$kmldata" |\
+       grep -A13 -e "<GroundOverlay id=.${i}.>" |\
+       sed "s/GroundOverlay id='${i}'/GroundOverlay id='$(($i + 1))'/"
+    done
+  fi
+)
+</Document>
+</kml>
+EOF
 
 	mv -f "$tmpkml" "$kml"
 
 fi
 
+rmdir "/tmp/${prod}.lock"
+
 ##### cleanup old #####
 
+#psql radar -c "delete from n0r where time < now() - interval '3 hours';"
+#psql radar -c "VACUUM n0r;"
 
 find "$wwwdisk/" -mmin +180 -name "*.tiff" -exec rm -f {} \;
 
