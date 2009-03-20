@@ -1,0 +1,273 @@
+#!/bin/bash
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Library General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor Boston, MA 02110-1301,  USA
+
+
+
+source /etc/profile
+
+srs="+proj=latlong +datum=WGS84"
+
+station=$5
+prod=$2
+
+##### time #####
+
+period=10
+
+unixtime=$(date -u -d "${3} ${4}" +%s)
+time=$(date -u -d @$unixtime "+%Y-%m-%dT%H:%M")
+newfdate=$(date -u -d @$unixtime "+%Y%m%d.%H%M")
+
+endtime=$(date -u -d @$(($unixtime + 60)) "+%Y-%m-%dT%H:%M")
+##### dirs #####
+
+wwwdisk="@wwwdisk@/radar"
+kmldisk="@wwwdisk@/kml/radar"
+www="@www@"
+wwwkml="@www@/kml/radar"
+
+if [[ ! -d "$wwwdisk" ]]
+then
+	mkdir -p "$wwwdisk"
+fi
+
+if [[ ! -d "$kmldisk" ]]
+then
+	mkdir -p "$kmldisk"
+fi
+
+##### files #####
+
+prodlower=$(echo "$prod" | tr [A-Z] [a-z])
+
+nids="$1"
+
+tmpkml="/tmp/${prod}.kml"
+kml="$kmldisk/${prod}.kml"
+
+tiff="/tmp/${prod}.${3}.${4}.${station}.tiff"
+warp="$wwwdisk/${prod}.$newfdate.${station}.tiff"
+basewarp=$(basename "$warp")
+
+tmp_tindex="/tmp/${prod}"
+tindex="$wwwdisk/${prod}"
+sqltindex="/tmp/${prod}.sqlite"
+
+mapfile="$wwwdisk/${prod}.map"
+
+##### decode #####
+
+
+nice -n 5 NIDS2gdal -n "$nids" -o "$tiff"
+
+rm "$nids"
+
+##### warp #####
+
+nice -n 5 gdalwarp -co TILED=YES -t_srs "$srs" "$tiff" "$warp"
+
+if [[ -f "$tiff" ]]
+then
+	rm "$tiff"
+fi
+
+##### lock #####
+
+while ! mkdir "/tmp/${prod}.lock"
+do
+	sleep 1
+done
+
+##### tileindex #####
+
+cd "${wwwdisk}/"
+
+##### does the db need setup? #####
+
+if createdb radar
+then
+	createlang plpgsql radar
+	psql -d radar -f /usr/share/lwpostgis.sql
+	psql -d radar -f /usr/share/spatial_ref_sys.sql
+	
+	psql -d radar -c "ALTER TABLE $prodlower ADD time timestamp;"
+	psql -d radar -c "create index idx_time on $prodlower (time);"
+fi
+
+
+##### if there is already a image for this station dupe #####
+
+lasttime=$(psql -d radar -t -c "SELECT time from $prodlower \
+																	WHERE location LIKE '%${station}%' \
+																	ORDER BY time desc \
+																	LIMIT 1;")
+
+
+if [[ "$lasttime" != "" ]]  && [[ $(($(date "+%s" -d "$lasttime UTC") + 60)) -lt "$unixtime" ]]
+then
+  dupestart=$(($(date "+%s" -d "$lasttime UTC") + 60))
+  dupeend=$(($unixtime - 60))
+  if [[ "$(($dupestart + 600))" -lt "$dupeend" ]]
+  then
+		dupeend=$(($dupestart + 600))
+	fi
+
+	for t in `seq $dupestart 60 $dupeend`
+	do
+		psql -d radar -c "INSERT INTO $prodlower (wkb_geometry, location, time) \
+													SELECT wkb_geometry, location, time + interval '1 minutes' \
+														FROM $prodlower \
+														WHERE location \
+														LIKE '%${station}%' \
+														ORDER BY time desc \
+														LIMIT 1;"
+	done
+fi
+
+##### add the tindex for this image #####
+
+gdaltindex "$tmp_tindex.shp" "$warp"
+psql -d radar -c "create index idx_time on $prodlower (time);"
+ogr2ogr -update -append -a_srs "EPSG:4326" -f PostgreSQL PG:dbname=radar "$tmp_tindex.shp"
+
+##### add the timestamp to the new tindex #####
+
+if psql -d radar -c "ALTER TABLE $prodlower ADD time timestamp;"
+then
+	psql -d radar -c "UPDATE $prodlower SET time = '$time' WHERE location = '$warp';"
+fi
+
+if [[ -f "$tmp_tindex.shp" ]]
+then
+        rm "$tmp_tindex.shp"
+        rm "$tmp_tindex.dbf"
+        rm "$tmp_tindex.shx"
+fi
+
+
+
+##### mapfile #####
+
+starttime=$(psql radar -q -P tuples_only -c "select time \
+                                               FROM n0r \
+                                               ORDER BY time asc \
+                                               LIMIT 1;" | sed 's/ /T/')
+
+
+cat > "$mapfile" <<EOF
+# polygon layer
+  LAYER
+    NAME 'Radar_${2}_idx'
+    TYPE POLYGON
+    STATUS ON
+    DATA 'wkb_geometry FROM ${prodlower} using unique wkb_geometry'
+    METADATA
+      'wms_title'        '$2'
+      'wms_srs'          'EPSG:900913 EPSG:4326'
+      'wms_extent'       '-180 -90 180 90'
+      'wms_timeextent'   '${starttime}Z/${time}:00Z/P1M'
+      'wms_timeitem'     'time'
+      'wms_timedefault'  '${time}:00'
+    END
+    CONNECTION 'dbname=radar'
+    CONNECTIONTYPE postgis
+  END
+
+# raster layer
+  LAYER
+    NAME 'Radar_${2}'
+    TYPE RASTER
+    STATUS ON
+    DUMP TRUE
+    PROJECTION
+     'proj=longlat'
+     'ellps=WGS84'
+     'datum=WGS84'
+     'no_defs'
+     ''
+    END
+    METADATA
+      'wms_title'        '$2'
+      'wms_srs'          'EPSG:900913 EPSG:4326'
+      'wms_extent'       '-180 -90 180 90'
+      'wms_timeextent'   '${starttime}Z/${time}:00Z/P1M'
+      'wms_timeitem'     'time'
+      'wms_timedefault'  '${time}:00'
+    END
+#    OFFSITE 0 0 0
+    TILEITEM 'location'
+    TILEINDEX 'Radar_${2}_idx'
+  END
+EOF
+
+##### kml #####
+
+part1="${www}/cgi-bin/radar_wms?SERVICE=WMS&amp;VERSION=1.1.1"
+part2="&amp;REQUEST=GetMap&amp;SRS=EPSG:4326"
+part3="&amp;LAYERS=Radar_$2"
+part4="&amp;TRANSPARENT=TRUE&amp;FORMAT=image/png"
+part5="&amp;time=$time"
+
+if [[ "$(grep "$kml" -e "<begin>${time}:00Z</begin>")" = "" ]]
+then
+
+	cat > $tmpkml <<EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://earth.google.com/kml/2.2">
+<Document>
+<GroundOverlay id='1'>
+  <Icon>
+    <href>${part1}${part2}${part3}${part4}${part5}</href>
+    <viewRefreshMode>onStop</viewRefreshMode>
+    <viewRefreshTime>1</viewRefreshTime>
+    <viewFormat>
+      BBOX=[bboxWest],[bboxSouth],[bboxEast],[bboxNorth]&amp;WIDTH=[horizPixels]&amp;HEIGHT=[vertPixels]
+    </viewFormat>
+  </Icon>
+  <TimeSpan>
+    <begin>${time}:00Z</begin>
+    <end>${endtime}:00Z</end>
+  </TimeSpan>
+</GroundOverlay>
+$(
+  if [[ -f $kml ]]
+  then
+    kmldata=$(cat $kml)
+    for i in $( seq 1 179)
+    do
+      echo "$kmldata" |\
+       grep -A13 -e "<GroundOverlay id=.${i}.>" |\
+       sed "s/GroundOverlay id='${i}'/GroundOverlay id='$(($i + 1))'/"
+    done
+  fi
+)
+</Document>
+</kml>
+EOF
+
+	mv -f "$tmpkml" "$kml"
+
+fi
+
+rmdir "/tmp/${prod}.lock"
+
+##### cleanup old #####
+
+#psql radar -c "delete from n0r where time < now() - interval '3 hours';"
+#psql radar -c "VACUUM n0r;"
+
+find "$wwwdisk/" -mmin +180 -name "*.tiff" -exec rm -f {} \;
+
+
