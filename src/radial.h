@@ -54,6 +54,15 @@ returns:
 
 void print_radial_header(NIDS_radials *r, int ln);
 
+/*******************************************************************************
+	function to convert radials to a raster
+*******************************************************************************/
+
+void radials_to_raster (NIDS_radials *r,
+	char *raster,
+	int width,
+	int height);
+
 #endif /* _RADIAL_H */
 
  

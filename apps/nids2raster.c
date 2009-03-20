@@ -88,19 +88,11 @@ int main (int argc, char **argv) {
 	
 	tiff = tiff_open(argv[3]);
 	
-	fread(mybuf, 30, 1, nids_fp);
-
 	NIDS_read(nids_fp, &data);
 	
 	//print_nids(&data);
 	
-	if (!(slayer = get_symbology_layer(&(data.symb), layer)))
-		exit(EXIT_FAILURE);
-	
-#warning fix this no layer type detection
-	
-	
-	radials2raster(&(slayer->rad), rast, 460, 460);
+	NIDS_to_raster(&data, rast, 460, 460);
 	
 	tiff_setfields(tiff, 460, 460);
 	
@@ -151,7 +143,7 @@ Step 5: Having completely defined the Raster & Model coordinate system,
 				
 	NIDS_free(&data);
 	TIFFClose(tiff);	
-	fclose(nids_fp);
+	NIDS_close(nids_fp);
 
 	return EXIT_SUCCESS;
 }

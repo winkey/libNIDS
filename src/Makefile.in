@@ -52,9 +52,9 @@ libLTLIBRARIES_INSTALL = $(INSTALL)
 LTLIBRARIES = $(lib_LTLIBRARIES)
 libNIDS_la_LIBADD =
 am_libNIDS_la_OBJECTS = msg_header.lo prod_desc.lo \
-	product_symbology.lo radial.lo raster.lo main.lo \
-	radial2raster.lo arrow.lo vector.lo precip.lo text.lo barb.lo \
-	v_vector.lo d_radial.lo circle.lo compression.lo
+	product_symbology.lo radial.lo raster.lo main.lo arrow.lo \
+	vector.lo precip.lo text.lo barb.lo v_vector.lo d_radial.lo \
+	circle.lo compression.lo product_dependent_desc.lo
 libNIDS_la_OBJECTS = $(am_libNIDS_la_OBJECTS)
 libNIDS_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
@@ -209,7 +209,6 @@ libNIDS_la_SOURCES = \
 	msg_header.h       \
 	prod_desc.h       \
 	radial.h       \
-	radial2raster.c       \
 	raster.h       \
 	arrow.c       \
 	vector.c       \
@@ -227,10 +226,13 @@ libNIDS_la_SOURCES = \
 	circle.h       \
 	circle.c       \
 	text.h       \
-	compression.c
+	compression.c       \
+	product_dependent_desc.c       \
+	product_dependent_desc.h
 
 libNIDS_la_LDFLAGS = \
-	-lm
+	-lm           \
+	-lbz2
 
 all: all-am
 
@@ -310,9 +312,9 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/msg_header.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/precip.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/prod_desc.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/product_dependent_desc.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/product_symbology.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/radial.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/radial2raster.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/raster.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/text.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/v_vector.Plo@am__quote@

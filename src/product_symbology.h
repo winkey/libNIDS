@@ -54,6 +54,22 @@ returns:
 
 void print_product_symbology(NIDS_product_symbology *s);
 
+/*******************************************************************************
+	function to convert the symbology block to a raster
+
+args:
+						s				the structure the product symbology is stored in
+
+returns:
+						nothing
+*******************************************************************************/
+
+void product_symbology_to_raster(
+	NIDS_product_symbology *s,
+	char *raster,
+	int width,
+	int height);
+
 #endif /* _PRODUCT_SYMBOLOGY_H */
 
  

@@ -336,6 +336,81 @@ void print_product_symbology(NIDS_product_symbology *s) {
 		print_symbology_layer(s->layers + i, i);
 }
 
+/*******************************************************************************
+	function to convert a symbology layer to a raster
+*******************************************************************************/
+
+void product_symbology_layer_to_raster (
+	NIDS_symbology_layer *l,
+	char *raster,
+	int width,
+	int height)
+{
+	
+	switch (l->data_type) {
+		case RADIAL:
+			radials_to_raster(&(l->rad), raster, width, height);
+			break;
+		
+		case D_RADIAL:
+			break;
+		
+		case RASTER1:
+		case RASTER2:
+			break;
+		
+		case ARROW:
+			break;
+		
+		case BARB:
+			break;
+		
+		case PRECIP:
+			break;
+		
+		case VECTOR:
+			break;
+		
+		case V_VECTOR:
+			break;
+		
+		case CIRCLE1:
+		case CIRCLE2:
+		case CIRCLE3:
+			break;
+		
+		case TEXT1:
+		case TEXT2:
+			break;
+		
+		default:
+			printf("unknown symbology layer %04x\n", l->data_type);
+							 
+	}
+}	
+
+/*******************************************************************************
+	function to convert the symbology block to a raster
+
+args:
+						s				the structure the product symbology is stored in
+
+returns:
+						nothing
+*******************************************************************************/
+
+void product_symbology_to_raster(
+	NIDS_product_symbology *s,
+	char *raster,
+	int width,
+	int height)
+{
+	int i;
+	
+	for (i = 0 ; i < s->num_layers ; i++)
+		product_symbology_layer_to_raster(s->layers + i, raster, width, height);
+	
+}
 NIDS_symbology_layer *get_symbology_layer(NIDS_product_symbology *s, int layer) {
 	NIDS_symbology_layer *result = NULL;
 	
@@ -346,3 +421,4 @@ NIDS_symbology_layer *get_symbology_layer(NIDS_product_symbology *s, int layer) 
 	
 	return result;
 }
+
