@@ -17,13 +17,14 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor Boston, MA 02110-1301,  USA
  */
 
-#include <stdio.h>
+//#include <stdio.h>
 #include <time.h>
 
+#include "error.h"
 #include "../include/NIDS.h"
 #include "get.h"
 #include "msg_header.h"
-#include "error.h"
+
 
 /*******************************************************************************
 1. Message Header Block

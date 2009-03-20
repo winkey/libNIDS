@@ -32,8 +32,7 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-bin_PROGRAMS = nidsinfo$(EXEEXT) NIDS2gdal$(EXEEXT)
-subdir = apps
+subdir = images
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.ac
@@ -42,37 +41,17 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
-am__installdirs = "$(DESTDIR)$(bindir)"
-binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
-PROGRAMS = $(bin_PROGRAMS)
-am_NIDS2gdal_OBJECTS = NIDS2gdal.$(OBJEXT) gdalcode.$(OBJEXT)
-NIDS2gdal_OBJECTS = $(am_NIDS2gdal_OBJECTS)
-NIDS2gdal_LDADD = $(LDADD)
-NIDS2gdal_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(NIDS2gdal_LDFLAGS) $(LDFLAGS) -o $@
-am_nidsinfo_OBJECTS = nidsinfo.$(OBJEXT)
-nidsinfo_OBJECTS = $(am_nidsinfo_OBJECTS)
-nidsinfo_LDADD = $(LDADD)
-nidsinfo_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
-	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(nidsinfo_LDFLAGS) \
-	$(LDFLAGS) -o $@
-DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
-depcomp = $(SHELL) $(top_srcdir)/depcomp
-am__depfiles_maybe = depfiles
-COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
-	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
-LTCOMPILE = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
-	--mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
-	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
-CCLD = $(CC)
-LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
-	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
-	$(LDFLAGS) -o $@
-SOURCES = $(NIDS2gdal_SOURCES) $(nidsinfo_SOURCES)
-DIST_SOURCES = $(NIDS2gdal_SOURCES) $(nidsinfo_SOURCES)
-ETAGS = etags
-CTAGS = ctags
+SOURCES =
+DIST_SOURCES =
+am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
+am__vpath_adj = case $$p in \
+    $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
+    *) f=$$p;; \
+  esac;
+am__strip_dir = `echo $$p | sed -e 's|^.*/||'`;
+am__installdirs = "$(DESTDIR)$(wwwdir)"
+wwwDATA_INSTALL = $(INSTALL_DATA)
+DATA = $(www_DATA)
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = @ACLOCAL@
 AMTAR = @AMTAR@
@@ -187,29 +166,27 @@ sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-NIDS2gdal_SOURCES = \
-	NIDS2gdal.c\
-	gdalcode.c \
-	gdalcode.h
-
-NIDS2gdal_LDFLAGS = \
-	-L../src/.libs \
-	-lNIDS \
-	-lz \
-	-lgdal
-
-nidsinfo_SOURCES = \
-	nidsinfo.c
-
-nidsinfo_LDFLAGS = \
-	-L../src/.libs \
-	-lNIDS \
-	-lz
+www = @WWW@
+wwwdisk = @WWWDISK@
+wwwdir = ${wwwdisk}/kml/images
+www_DATA = \
+  4bit_reflectivity.png \
+  3bit_reflectivity.png \
+  4bit_reflectivity_clear.png \
+  4bit_velocity.png \
+  2bit_severeweather.png \
+  3bit_reflectivity_clear.png \
+  3bit_vad.png \
+  3bit_velocity.png \
+  3bit_vwp.png \
+  4bit_echotops.png \
+  4bit_precip.png \
+  4bit_shear.png \
+  n0r.png
 
 all: all-am
 
 .SUFFIXES:
-.SUFFIXES: .c .lo .o .obj
 $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
@@ -219,9 +196,9 @@ $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__confi
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --gnu  apps/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --gnu  images/Makefile'; \
 	cd $(top_srcdir) && \
-	  $(AUTOMAKE) --gnu  apps/Makefile
+	  $(AUTOMAKE) --gnu  images/Makefile
 .PRECIOUS: Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
@@ -239,124 +216,35 @@ $(top_srcdir)/configure: @MAINTAINER_MODE_TRUE@ $(am__configure_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(ACLOCAL_M4): @MAINTAINER_MODE_TRUE@ $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
-install-binPROGRAMS: $(bin_PROGRAMS)
-	@$(NORMAL_INSTALL)
-	test -z "$(bindir)" || $(MKDIR_P) "$(DESTDIR)$(bindir)"
-	@list='$(bin_PROGRAMS)'; for p in $$list; do \
-	  p1=`echo $$p|sed 's/$(EXEEXT)$$//'`; \
-	  if test -f $$p \
-	     || test -f $$p1 \
-	  ; then \
-	    f=`echo "$$p1" | sed 's,^.*/,,;$(transform);s/$$/$(EXEEXT)/'`; \
-	   echo " $(INSTALL_PROGRAM_ENV) $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=install $(binPROGRAMS_INSTALL) '$$p' '$(DESTDIR)$(bindir)/$$f'"; \
-	   $(INSTALL_PROGRAM_ENV) $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=install $(binPROGRAMS_INSTALL) "$$p" "$(DESTDIR)$(bindir)/$$f" || exit 1; \
-	  else :; fi; \
-	done
-
-uninstall-binPROGRAMS:
-	@$(NORMAL_UNINSTALL)
-	@list='$(bin_PROGRAMS)'; for p in $$list; do \
-	  f=`echo "$$p" | sed 's,^.*/,,;s/$(EXEEXT)$$//;$(transform);s/$$/$(EXEEXT)/'`; \
-	  echo " rm -f '$(DESTDIR)$(bindir)/$$f'"; \
-	  rm -f "$(DESTDIR)$(bindir)/$$f"; \
-	done
-
-clean-binPROGRAMS:
-	@list='$(bin_PROGRAMS)'; for p in $$list; do \
-	  f=`echo $$p|sed 's/$(EXEEXT)$$//'`; \
-	  echo " rm -f $$p $$f"; \
-	  rm -f $$p $$f ; \
-	done
-NIDS2gdal$(EXEEXT): $(NIDS2gdal_OBJECTS) $(NIDS2gdal_DEPENDENCIES) 
-	@rm -f NIDS2gdal$(EXEEXT)
-	$(NIDS2gdal_LINK) $(NIDS2gdal_OBJECTS) $(NIDS2gdal_LDADD) $(LIBS)
-nidsinfo$(EXEEXT): $(nidsinfo_OBJECTS) $(nidsinfo_DEPENDENCIES) 
-	@rm -f nidsinfo$(EXEEXT)
-	$(nidsinfo_LINK) $(nidsinfo_OBJECTS) $(nidsinfo_LDADD) $(LIBS)
-
-mostlyclean-compile:
-	-rm -f *.$(OBJEXT)
-
-distclean-compile:
-	-rm -f *.tab.c
-
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/NIDS2gdal.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gdalcode.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/nidsinfo.Po@am__quote@
-
-.c.o:
-@am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
-@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(COMPILE) -c $<
-
-.c.obj:
-@am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ `$(CYGPATH_W) '$<'`
-@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(COMPILE) -c `$(CYGPATH_W) '$<'`
-
-.c.lo:
-@am__fastdepCC_TRUE@	$(LTCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
-@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LTCOMPILE) -c -o $@ $<
 
 mostlyclean-libtool:
 	-rm -f *.lo
 
 clean-libtool:
 	-rm -rf .libs _libs
+install-wwwDATA: $(www_DATA)
+	@$(NORMAL_INSTALL)
+	test -z "$(wwwdir)" || $(MKDIR_P) "$(DESTDIR)$(wwwdir)"
+	@list='$(www_DATA)'; for p in $$list; do \
+	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	  f=$(am__strip_dir) \
+	  echo " $(wwwDATA_INSTALL) '$$d$$p' '$(DESTDIR)$(wwwdir)/$$f'"; \
+	  $(wwwDATA_INSTALL) "$$d$$p" "$(DESTDIR)$(wwwdir)/$$f"; \
+	done
 
-ID: $(HEADERS) $(SOURCES) $(LISP) $(TAGS_FILES)
-	list='$(SOURCES) $(HEADERS) $(LISP) $(TAGS_FILES)'; \
-	unique=`for i in $$list; do \
-	    if test -f "$$i"; then echo $$i; else echo $(srcdir)/$$i; fi; \
-	  done | \
-	  $(AWK) '{ files[$$0] = 1; nonemtpy = 1; } \
-	      END { if (nonempty) { for (i in files) print i; }; }'`; \
-	mkid -fID $$unique
+uninstall-wwwDATA:
+	@$(NORMAL_UNINSTALL)
+	@list='$(www_DATA)'; for p in $$list; do \
+	  f=$(am__strip_dir) \
+	  echo " rm -f '$(DESTDIR)$(wwwdir)/$$f'"; \
+	  rm -f "$(DESTDIR)$(wwwdir)/$$f"; \
+	done
 tags: TAGS
+TAGS:
 
-TAGS:  $(HEADERS) $(SOURCES)  $(TAGS_DEPENDENCIES) \
-		$(TAGS_FILES) $(LISP)
-	tags=; \
-	here=`pwd`; \
-	list='$(SOURCES) $(HEADERS)  $(LISP) $(TAGS_FILES)'; \
-	unique=`for i in $$list; do \
-	    if test -f "$$i"; then echo $$i; else echo $(srcdir)/$$i; fi; \
-	  done | \
-	  $(AWK) '{ files[$$0] = 1; nonempty = 1; } \
-	      END { if (nonempty) { for (i in files) print i; }; }'`; \
-	if test -z "$(ETAGS_ARGS)$$tags$$unique"; then :; else \
-	  test -n "$$unique" || unique=$$empty_fix; \
-	  $(ETAGS) $(ETAGSFLAGS) $(AM_ETAGSFLAGS) $(ETAGS_ARGS) \
-	    $$tags $$unique; \
-	fi
 ctags: CTAGS
-CTAGS:  $(HEADERS) $(SOURCES)  $(TAGS_DEPENDENCIES) \
-		$(TAGS_FILES) $(LISP)
-	tags=; \
-	list='$(SOURCES) $(HEADERS)  $(LISP) $(TAGS_FILES)'; \
-	unique=`for i in $$list; do \
-	    if test -f "$$i"; then echo $$i; else echo $(srcdir)/$$i; fi; \
-	  done | \
-	  $(AWK) '{ files[$$0] = 1; nonempty = 1; } \
-	      END { if (nonempty) { for (i in files) print i; }; }'`; \
-	test -z "$(CTAGS_ARGS)$$tags$$unique" \
-	  || $(CTAGS) $(CTAGSFLAGS) $(AM_CTAGSFLAGS) $(CTAGS_ARGS) \
-	     $$tags $$unique
+CTAGS:
 
-GTAGS:
-	here=`$(am__cd) $(top_builddir) && pwd` \
-	  && cd $(top_srcdir) \
-	  && gtags -i $(GTAGS_ARGS) $$here
-
-distclean-tags:
-	-rm -f TAGS ID GTAGS GRTAGS GSYMS GPATH tags
 
 distdir: $(DISTFILES)
 	@srcdirstrip=`echo "$(srcdir)" | sed 's/[].[^$$\\*]/\\\\&/g'`; \
@@ -386,9 +274,9 @@ distdir: $(DISTFILES)
 	done
 check-am: all-am
 check: check-am
-all-am: Makefile $(PROGRAMS)
+all-am: Makefile $(DATA)
 installdirs:
-	for dir in "$(DESTDIR)$(bindir)"; do \
+	for dir in "$(DESTDIR)$(wwwdir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
 install: install-am
@@ -417,13 +305,11 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 clean: clean-am
 
-clean-am: clean-binPROGRAMS clean-generic clean-libtool mostlyclean-am
+clean-am: clean-generic clean-libtool mostlyclean-am
 
 distclean: distclean-am
-	-rm -rf ./$(DEPDIR)
 	-rm -f Makefile
-distclean-am: clean-am distclean-compile distclean-generic \
-	distclean-tags
+distclean-am: clean-am distclean-generic
 
 dvi: dvi-am
 
@@ -435,11 +321,11 @@ info: info-am
 
 info-am:
 
-install-data-am:
+install-data-am: install-wwwDATA
 
 install-dvi: install-dvi-am
 
-install-exec-am: install-binPROGRAMS
+install-exec-am:
 
 install-html: install-html-am
 
@@ -454,14 +340,12 @@ install-ps: install-ps-am
 installcheck-am:
 
 maintainer-clean: maintainer-clean-am
-	-rm -rf ./$(DEPDIR)
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 
 mostlyclean: mostlyclean-am
 
-mostlyclean-am: mostlyclean-compile mostlyclean-generic \
-	mostlyclean-libtool
+mostlyclean-am: mostlyclean-generic mostlyclean-libtool
 
 pdf: pdf-am
 
@@ -471,24 +355,61 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-binPROGRAMS
+uninstall-am: uninstall-wwwDATA
 
 .MAKE: install-am install-strip
 
-.PHONY: CTAGS GTAGS all all-am check check-am clean clean-binPROGRAMS \
-	clean-generic clean-libtool ctags distclean distclean-compile \
-	distclean-generic distclean-libtool distclean-tags distdir dvi \
+.PHONY: all all-am check check-am clean clean-generic clean-libtool \
+	distclean distclean-generic distclean-libtool distdir dvi \
 	dvi-am html html-am info info-am install install-am \
-	install-binPROGRAMS install-data install-data-am install-dvi \
-	install-dvi-am install-exec install-exec-am install-html \
-	install-html-am install-info install-info-am install-man \
-	install-pdf install-pdf-am install-ps install-ps-am \
-	install-strip installcheck installcheck-am installdirs \
+	install-data install-data-am install-dvi install-dvi-am \
+	install-exec install-exec-am install-html install-html-am \
+	install-info install-info-am install-man install-pdf \
+	install-pdf-am install-ps install-ps-am install-strip \
+	install-wwwDATA installcheck installcheck-am installdirs \
 	maintainer-clean maintainer-clean-generic mostlyclean \
-	mostlyclean-compile mostlyclean-generic mostlyclean-libtool \
-	pdf pdf-am ps ps-am tags uninstall uninstall-am \
-	uninstall-binPROGRAMS
+	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
+	uninstall uninstall-am uninstall-wwwDATA
 
+
+4bit_reflectivity.png: ../share/4bit_reflectivity.scale Makefile ../scripts/makekey2.sh
+	../scripts/makekey2.sh ../share/4bit_reflectivity.scale "DBZ" 4bit_reflectivity.png
+
+3bit_reflectivity.png: ../share/3bit_reflectivity.scale Makefile ../scripts/makekey2.sh
+	../scripts/makekey2.sh ../share/3bit_reflectivity.scale "DBZ" 3bit_reflectivity.png
+
+4bit_reflectivity_clear.png: ../share/4bit_reflectivity_clear.scale Makefile ../scripts/makekey2.sh
+	../scripts/makekey2.sh ../share/4bit_reflectivity_clear.scale "DBZ" 4bit_reflectivity_clear.png
+
+4bit_velocity.png: ../share/4bit_velocity.scale Makefile ../scripts/makekey2.sh
+	../scripts/makekey2.sh ../share/4bit_velocity.scale "DBZ" 4bit_velocity.png
+
+2bit_severeweather.png: ../share/2bit_severeweather.scale Makefile ../scripts/makekey2.sh
+	../scripts/makekey2.sh ../share/2bit_severeweather.scale "DBZ" 2bit_severeweather.png
+
+3bit_reflectivity_clear.png: ../share/3bit_reflectivity_clear.scale Makefile ../scripts/makekey2.sh
+	../scripts/makekey2.sh ../share/3bit_reflectivity_clear.scale "DBZ" 3bit_reflectivity_clear.png
+
+3bit_vad.png: ../share/3bit_vad.scale Makefile ../scripts/makekey2.sh
+	../scripts/makekey2.sh ../share/3bit_vad.scale "DBZ" 3bit_vad.png
+
+3bit_velocity.png: ../share/3bit_velocity.scale Makefile ../scripts/makekey2.sh
+	../scripts/makekey2.sh ../share/3bit_velocity.scale "DBZ" 3bit_velocity.png
+
+3bit_vwp.png: ../share/3bit_vwp.scale Makefile ../scripts/makekey2.sh
+	../scripts/makekey2.sh ../share/3bit_vwp.scale "DBZ" 3bit_vwp.png
+
+4bit_echotops.png: ../share/4bit_echotops.scale Makefile ../scripts/makekey2.sh
+	../scripts/makekey2.sh ../share/4bit_echotops.scale "DBZ" 4bit_echotops.png
+
+4bit_precip.png: ../share/4bit_precip.scale Makefile ../scripts/makekey2.sh
+	../scripts/makekey2.sh ../share/4bit_precip.scale "DBZ" 4bit_precip.png
+
+4bit_shear.png: ../share/4bit_shear.scale Makefile ../scripts/makekey2.sh
+	../scripts/makekey2.sh ../share/4bit_shear.scale "DBZ" 4bit_shear.png
+
+n0r.png: ../share/n0r.scale Makefile ../scripts/makekey2.sh
+	../scripts/makekey2.sh ../share/n0r.scale "DBZ" n0r.png
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

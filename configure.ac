@@ -1,7 +1,7 @@
 dnl Process this file with autoconf to produce a configure script.
 dnl Created by Anjuta application wizard.
 
-AC_INIT(libnids, 0.9)
+AC_INIT(libnids, 0.10)
 
 AM_INIT_AUTOMAKE(AC_PACKAGE_NAME, AC_PACKAGE_VERSION)
 AM_CONFIG_HEADER(config.h)
@@ -19,6 +19,32 @@ AC_HEADER_STDC
 
 AM_PROG_LIBTOOL
 
+
+AC_ARG_WITH(www,
+  [AS_HELP_STRING([--with-www=someurl],
+    [base url to use in kml output])],
+  if test -n "$withval"
+  then
+    WWW="$withval"
+    AC_SUBST(WWW)
+  else
+		[AC_MSG_FAILURE([--with-www=someurl MUST be specified])]
+	fi,
+  [AC_MSG_FAILURE([--with-www=someurl MUST be specified])]
+)
+
+AC_ARG_WITH(wwwdisk,
+  [AS_HELP_STRING([--with-wwwdisk=/some/path],
+    [base dir to output kml and images])],
+  if test -n "$withval"
+  then
+    WWWDISK="$withval"
+    AC_SUBST(WWWDISK)
+  else
+		[AC_MSG_FAILURE([--with-wwwdisk=/some/path MUST be specified])]
+	fi,
+  [AC_MSG_FAILURE([--with-wwwdisk=/some/path MUST be specified])]
+)
 
 AC_MSG_CHECKING([how to link PROJ.4 library])
 
@@ -103,6 +129,7 @@ AC_OUTPUT([
 Makefile
 apps/Makefile
 etc/Makefile
+images/Makefile
 include/Makefile
 kml/Makefile
 scripts/Makefile

@@ -140,6 +140,8 @@ SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 STRIP = @STRIP@
 VERSION = @VERSION@
+WWW = @WWW@
+WWWDISK = @WWWDISK@
 abs_builddir = @abs_builddir@
 abs_srcdir = @abs_srcdir@
 abs_top_builddir = @abs_top_builddir@
@@ -197,7 +199,8 @@ SUBDIRS = src \
 	share  \
 	scripts  \
 	etc  \
-	kml
+	kml  \
+	images
 
 libnidsdocdir = ${prefix}/doc/libnids
 libnidsdoc_DATA = \

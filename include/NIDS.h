@@ -582,7 +582,7 @@ char *NIDS_to_raster(
 	int *height);
 
 typedef struct {
-  char value[10];
+  float value;
   char color[7];
 } NIDS_color;
 
@@ -590,7 +590,35 @@ void NIDS_get_color(
 	NIDS *data,
 	NIDS_color **colors);
 
+/*******************************************************************************
+	function to get the scale
 
+	args:
+							name				the name of the scale
+
+	returns:
+							the scale
+	
+	NOTE: you must free() the result when your done with it
+*******************************************************************************/
+
+NIDS_color *color_getscale(
+	char *name);
+
+/*******************************************************************************
+	function to get a color from a scale
+
+	args:
+							scales			the scale to check
+							value				the value to check for in the scale
+
+	returns:
+							the color for the value
+*******************************************************************************/
+ 
+char *color_checkscale(
+	NIDS_color *scales,
+	float value);
 
 
 

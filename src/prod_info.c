@@ -237,10 +237,10 @@ CODE      NTR       PRODUCT NAME                       RESOLUTION               
 Note: For all message codes for products: Units is N/A, Range is 0 to value shown and Accuracy/Precision is 1.1
 */
 
-NIDS_prod_info * get_prod_info(int code) {
-	NIDS_prod_info * info;
+NIDS_prod_info *get_prod_info(int code) {
+	NIDS_prod_info *info;
 	
-	for (info = prod_info ; code != info->code && info->code > 0 ; code++) {
+	for (info = prod_info ; code != info->code && info->code > 0 ; info++) {
 	}
 	
 	return info;
