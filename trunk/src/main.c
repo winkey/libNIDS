@@ -1,7 +1,7 @@
 /*
- * main.c
- * Copyright (C) winkey 2008 <rush@winkey.org>
- * 
+ * libNIDS
+ * Copyright (C) Brian Case 2008 <rush@gisweather.org>
+ *
  * main.c is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
  * Free Software Foundation, either version 3 of the License, or
