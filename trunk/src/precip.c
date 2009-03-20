@@ -17,12 +17,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
 #include <errno.h>
+#include <time.h>
 
-#include "get.h"
 #include "../include/NIDS.h"
+#include "get.h"
 #include "precip.h"
+#include "error.h"
 
 /*******************************************************************************
 Individual Rows
@@ -51,15 +52,12 @@ char *parse_precip_row(char *buf, NIDS_precip_row *r) {
 	int i;
 	
 	r->num_rle = GET2(buf);
-	printf("num_rle = %i", r->num_rle);
-	if (!(r->run = malloc(r->num_rle))) {
-		fprintf(stderr, "ERROR: percip_parse_row : %s\n", strerror(errno));
-		exit(EXIT_FAILURE);
-	}
-	if (!(r->code = malloc(r->num_rle))) {
-		fprintf(stderr, "ERROR: percip_parse_row : %s\n", strerror(errno));
-		exit(EXIT_FAILURE);
-	}
+	
+	if (!(r->run = malloc(r->num_rle)))
+		ERROR("percip_parse_row");
+	
+	if (!(r->code = malloc(r->num_rle)))
+		ERROR("percip_parse_row");
 	
 	p = buf + 2;
 	
@@ -102,10 +100,8 @@ char *parse_precip_header(char *buf, NIDS_precip *r) {
 	r->lfm_per_row = GET2(buf + 4);
 	r->num_rows = GET2(buf + 6);
 	
-	if (!(r->rows = malloc(r->num_rows * sizeof(NIDS_precip)))) {
-		fprintf(stderr, "ERROR: parse_precip_header : %s\n", strerror(errno));
-		exit(EXIT_FAILURE);
-	}
+	if (!(r->rows = malloc(r->num_rows * sizeof(NIDS_precip))))
+		ERROR("parse_precip_header");
 	
 	p = buf + 8;
 	
@@ -156,16 +152,16 @@ void free_precip_header(NIDS_precip *r) {
 
 args:
 						r				the structure the precip row is stored in
-						ln			the layer number
+						prefix	the start of the line
 						rn			the barb number
 
 returns:
 						nothing
 *******************************************************************************/
 
-void print_precip_row(NIDS_precip_row *r, int ln, int rn) {
+void print_precip_row(NIDS_precip_row *r, char *prefix, int rn) {
 	
-	printf("data.symb.layers[%i].precip.rows[%i].num_rle %i\n", ln, rn, r->num_rle);
+	printf("%s.precip.rows[%i].num_rle %i\n", prefix, rn, r->num_rle);
 	
 }
 	
@@ -174,21 +170,21 @@ void print_precip_row(NIDS_precip_row *r, int ln, int rn) {
 
 args:
 						b				the structure the percip is stored in
-						ln			the layer number
+						prefix	the start of the line
 
 returns:
 						nothing
 *******************************************************************************/
 
-void print_precip_header(NIDS_precip *r, int ln) {
+void print_precip_header(NIDS_precip *r, char *prefix) {
 	int i;
 	
-	printf("data.symb.layers[%i].precip.op_flags1 %i\n", ln, r->op_flags1);
-	printf("data.symb.layers[%i].precip.op_flags2 %i\n", ln, r->op_flags2);
-	printf("data.symb.layers[%i].precip.lfm_per_row %i\n", ln, r->lfm_per_row);
-	printf("data.symb.layers[%i].precip.num_rows %i\n", ln, r->num_rows);
+	printf("%s.precip.op_flags1 %i\n", prefix, r->op_flags1);
+	printf("%s.precip.op_flags2 %i\n", prefix, r->op_flags2);
+	printf("%s.precip.lfm_per_row %i\n", prefix, r->lfm_per_row);
+	printf("%s.precip.num_rows %i\n", prefix, r->num_rows);
 	
 	for (i = 0 ; i < r->num_rows ; i++)
-		print_precip_row(r->rows + i, ln, i);
+		print_precip_row(r->rows + i, prefix, i);
 	
 }

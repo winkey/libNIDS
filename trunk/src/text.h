@@ -46,13 +46,13 @@ void free_text_header(NIDS_text *t);
 
 args:
 						t				the structure the text is stored in
-						ln			the layer number
+						prefix	the start of the line
 
 returns:
 						nothing
 *******************************************************************************/
 
-void print_text_header(NIDS_text *t, int ln);
+void print_text_header(NIDS_text *t, char *prefix);
 
 #endif /* _TEXT_H */
 

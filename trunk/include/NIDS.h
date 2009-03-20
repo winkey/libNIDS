@@ -239,6 +239,7 @@ typedef struct {
 *******************************************************************************/
 
 typedef struct {
+	size_t length;
 	int num_chars;
 	int x_start;
 	int y_start;
@@ -246,25 +247,91 @@ typedef struct {
 } NIDS_text;
 
 /*******************************************************************************
+	valued text packet
+*******************************************************************************/
+
+typedef struct {
+	size_t length;
+	int num_chars;
+	int value;
+	int x_start;
+	int y_start;
+	char *chars;
+} NIDS_v_text;
+
+/*******************************************************************************
+	Storm Id Packet
+*******************************************************************************/
+
+typedef struct {
+	int x_pos;
+	int y_pos;
+	char id[3];
+} NIDS_storm_id;
+
+typedef struct {
+	int length;
+	int num_ids;
+	NIDS_storm_id *ids;
+} NIDS_storm_ids;
+
+/*******************************************************************************
+	linked vector
+*******************************************************************************/
+
+typedef NIDS_vectors NIDS_linked_vectors;
+
+/*******************************************************************************
+	value linked vector
+*******************************************************************************/
+
+typedef NIDS_v_vectors NIDS_v_linked_vectors;
+
+/*******************************************************************************
+	past or forecast packet
+*******************************************************************************/
+
+typedef struct {
+	int data_type;
+	union {
+		NIDS_text text;
+		NIDS_linked_vectors linked_vector;
+		NIDS_circles circle;
+	};
+} NIDS_forecast;
+
+
+typedef struct {
+	size_t length;
+	int num_forecasts;
+	NIDS_forecast *forecasts;
+} NIDS_forecasts;
+
+/*******************************************************************************
 	Symbology data type codes
 *******************************************************************************/
 
-#define TEXT1			0x0001
-#define TEXT2			0x0002
-#define CIRCLE1		0x0003
-#define BARB			0x0004
-#define ARROW			0x0005
-#define VECTOR		0x0007
-#define V_TEXT		0x0008
-#define V_VECTOR	0x000A
-#define CIRCLE2		0x000B
-#define D_RADIAL	0x0010
-#define PRECIP		0x0011
-#define CIRCLE3		0x0019
+#define TEXT1							0x0001
+#define TEXT2							0x0002
+#define CIRCLE1						0x0003
+#define BARB							0x0004
+#define ARROW							0x0005
+#define LINKED_VECTOR			0x0006
+#define VECTOR						0x0007
+#define V_TEXT						0x0008
+#define V_LINKED_VECTOR		0x0009
+#define V_VECTOR					0x000A
+#define CIRCLE2						0x000B
+#define D_RADIAL					0x0010
+#define PRECIP						0x0011
+#define STORM_ID					0x0013
+#define FORECAST1					0x0017
+#define FORECAST2					0x0018
+#define CIRCLE3						0x0019
 
-#define RADIAL		0xAF1F
-#define RASTER1		0xBA0F
-#define RASTER2		0xBA07
+#define RADIAL						0xAF1F
+#define RASTER1						0xBA0F
+#define RASTER2						0xBA07
 
 
 
@@ -273,6 +340,7 @@ typedef struct {
 	Symbology Layer
 *******************************************************************************/
 
+#define PREFIX_LEN 100
 typedef struct {
 	size_t length;
 	int data_type;
@@ -287,6 +355,11 @@ typedef struct {
 		NIDS_v_vectors v_vector;
 		NIDS_circles circle;
 		NIDS_text text;
+		NIDS_v_text v_text;
+		NIDS_storm_ids storm_id;
+		NIDS_linked_vectors linked_vector;
+		NIDS_v_linked_vectors v_linked_vector;
+		NIDS_forecasts forecast;
 	};
 } NIDS_symbology_layer;
 
@@ -324,13 +397,21 @@ void NIDS_free(NIDS *data);
 
 void NIDS_print(NIDS *data);
 
-void NIDS_to_raster(
-	NIDS *data,
-	char *raster,
-	int width,
-	int height);
 
-NIDS_symbology_layer *get_symbology_layer(NIDS_product_symbology *s, int layer);
+char *NIDS_to_raster(
+	NIDS *data,
+	int layer,
+	int *width,
+	int *height);
+
+typedef struct {
+	unsigned char codes[4];
+} NIDS_color;
+
+void NIDS_get_color(
+	NIDS *data,
+	NIDS_color **colors);
+
 
 #endif /* _NIDS_H */
 

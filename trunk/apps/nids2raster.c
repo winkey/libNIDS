@@ -16,29 +16,12 @@
  
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <tiffio.h>
 #include <geotiffio.h>
 
 #include "../include/NIDS.h"
 
-unsigned char colors[16][4] = {
-	{0x00, 0x00, 0x00, 0x00},
-	{0x00, 0xff, 0x00, 0xff},
-	{0x00, 0xf0, 0x00, 0xff},
-	{0x00, 0xe0, 0x00, 0xff},
-	{0x00, 0xd0, 0x00, 0xff},
-	{0x00, 0xc0, 0x00, 0xff},
-	{0x00, 0xb0, 0x00, 0xff},
-	{0x00, 0xa0, 0x00, 0xff},
-	{0xc0, 0xc0, 0xc0, 0xff},
-	{0xb0, 0x00, 0x00, 0xff},
-	{0xc0, 0x00, 0x00, 0xff},
-	{0xd0, 0x00, 0x00, 0xff},
-	{0xe0, 0x00, 0x00, 0xff},
-	{0xf0, 0x00, 0x00, 0xff},
-	{0xff, 0x00, 0x00, 0xff},
-	{0xc0, 0x40, 0xc0, 0xff}
-};
 
 TIFF *tiff_open (char *file) {
 	TIFF *result = NULL;
@@ -70,10 +53,13 @@ int main (int argc, char **argv) {
 	int layer;
 	NIDS data = {};
 	NIDS_symbology_layer *slayer = NULL;
-	char rast[460*460] = {};
+	char *rast = NULL;
 	int i, j;
-	char line[460 * 4];
-	
+	char line[4097 * 4];
+	int width = 0, height = 0;
+	NIDS_color *colors = NULL;
+	char pixel;
+
 	if (argc < 4 || argc > 4) {
 		fprintf (stderr, "USAGE: %s <layernumber> <nidsfile> <tifffile>\n", argv[0]);
 		exit(EXIT_FAILURE);
@@ -92,9 +78,9 @@ int main (int argc, char **argv) {
 	
 	//print_nids(&data);
 	
-	NIDS_to_raster(&data, rast, 460, 460);
+	rast = NIDS_to_raster(&data, layer, &width, &height);
 	
-	tiff_setfields(tiff, 460, 460);
+	tiff_setfields(tiff, width, height);
 	
 //	GTModelTypeGeoKey ModelTypeGeographic  = 2   /* Geographic latitude-longitude System */
 /*	GTRasterTypeGeoKey RasterPixelIsArea.
@@ -126,14 +112,16 @@ Step 5: Having completely defined the Raster & Model coordinate system,
       to tie the raster image down onto the Model space.
 
 */		
-	TIFFSetField(tiff, TIFFTAG_ROWSPERSTRIP, TIFFDefaultStripSize(tiff, 460 * 4));
+	TIFFSetField(tiff, TIFFTAG_ROWSPERSTRIP, TIFFDefaultStripSize(tiff, width * 4));
 	
-	for (i = 0; i < 460; i++) {
-		for (j = 0; j < 460 ; j++) {
-			line[j * 4 + 0] = colors[(int)rast[i + j * 460]][0];
-			line[j * 4 + 1] = colors[(int)rast[i + j * 460]][1];
-			line[j * 4 + 2] = colors[(int)rast[i + j * 460]][2];
-			line[j * 4 + 3] = colors[(int)rast[i + j * 460]][3];
+	NIDS_get_color(&data, &colors);
+	
+	
+	for (i = 0; i < height; i++) {
+		for (j = 0; j < width ; j++) {
+			pixel = rast[j + i * width];
+			memcpy(&line[j * 4], colors[(int)pixel].codes, 4);
+			
 		}
 		if (0 > TIFFWriteScanline(tiff, line, i, 0)) {
 			fprintf(stderr, "Could not write image\n");

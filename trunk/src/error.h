@@ -14,13 +14,15 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor Boston, MA 02110-1301,  USA
  */
  
-#ifndef _PRODUCT_DEPENDENT_DESC_H
-#define _PRODUCT_DEPENDENT_DESC_H
+#ifndef _ERROR_H
+#define _ERROR_H
 
+#define ERROR(x) {\
+  fprintf(stderr, "ERROR:file %s:line %d:function %s:%s\n",\
+	        __FILE__, __LINE__, (x), strerror(errno));\
+	exit(EXIT_FAILURE);\
+}
 
-void parse_product_dependent_desc(int msgcode, char *buf, prod_dep_desc *pdd);
-
-
-#endif /* _PRODUCT_DEPENDENT_DESC_H */
+#endif /* _ERROR_H */
 
  

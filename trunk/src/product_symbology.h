@@ -17,7 +17,6 @@
 #ifndef _PRODUCT_SYMBOLOGY_H
 #define _PRODUCT_SYMBOLOGY_H
 
-
 /*******************************************************************************
 	function to parse the Product Symbology
 	
@@ -64,11 +63,11 @@ returns:
 						nothing
 *******************************************************************************/
 
-void product_symbology_to_raster(
+char *product_symbology_to_raster(
 	NIDS_product_symbology *s,
-	char *raster,
-	int width,
-	int height);
+	int layer,
+	int *width,
+	int *height);
 
 #endif /* _PRODUCT_SYMBOLOGY_H */
 

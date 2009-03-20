@@ -17,13 +17,17 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
 #include <errno.h>
 #include <math.h>
+#include <time.h>
 
-#include "get.h"
 #include "../include/NIDS.h"
+#include "get.h"
 #include "radial.h"
+#include "error.h"
+
+#define RASTER_X_SIZE 4096
+#define RASTER_Y_SIZE 4096
 
 /*******************************************************************************
 Individual Radials
@@ -64,14 +68,11 @@ char *parse_radial(char *buf, NIDS_radial *r) {
 	r->delta = GET2(buf + 4);
 	r->delta /= 10;
 	
-	if (!(r->run = malloc(r->num_rle * 2))) {
-		fprintf(stderr, "ERROR: parse_radial : %s\n", strerror(errno));
-		exit(EXIT_FAILURE);
-	}
-	if (!(r->code = malloc(r->num_rle * 2))) {
-		fprintf(stderr, "ERROR: parse_radial : %s\n", strerror(errno));
-		exit(EXIT_FAILURE);
-	}
+	if (!(r->run = malloc(r->num_rle * 2)))
+		ERROR("parse_radial");
+	
+	if (!(r->code = malloc(r->num_rle * 2)))
+		ERROR("parse_radial");
 	
 	p = buf + 6;
 	
@@ -121,10 +122,8 @@ char *parse_radial_header(char *buf, NIDS_radials *r) {
 	r->scale = GET2(buf + 8);
 	r->num_radials = GET2(buf + 10);
 	
-	if (!(r->radials = malloc(r->num_radials * sizeof(NIDS_radial)))) {
-		fprintf(stderr, "ERROR: parse_radial_header : %s\n", strerror(errno));
-		exit(EXIT_FAILURE);
-	}
+	if (!(r->radials = malloc(r->num_radials * sizeof(NIDS_radial))))
+		ERROR("parse_radial_header");
 	
 	p = buf + 12;
 	
@@ -175,18 +174,19 @@ void free_radial_header(NIDS_radials *r) {
 
 args:
 						r				the structure the radial is stored in
-						ln			the layer number
+						prefix	the start of the line
+
 						rn			the radial number
 
 returns:
 						nothing
 *******************************************************************************/
 
-void print_radial(NIDS_radial *r, int ln, int rn) {
+void print_radial(NIDS_radial *r, char *prefix, int rn) {
 	
-	printf("data.symb.layers[%i].rad.radials[%i].num_rle %i\n", ln, rn, r->num_rle);
-	printf("data.symb.layers[%i].rad.radials[%i].start %f\n", ln, rn, r->start);
-	printf("data.symb.layers[%i].rad.radials[%i].delta %f\n", ln, rn, r->delta);
+	printf("%s.rad.radials[%i].num_rle %i\n", prefix, rn, r->num_rle);
+	printf("%s.rad.radials[%i].start %f\n", prefix, rn, r->start);
+	printf("%s.rad.radials[%i].delta %f\n", prefix, rn, r->delta);
 	
 }
 
@@ -195,27 +195,28 @@ void print_radial(NIDS_radial *r, int ln, int rn) {
 
 args:
 						r				the structure the radials are stored in
-						ln			the layer number
+						prefix	the start of the line
+
 
 returns:
 						nothing
 *******************************************************************************/
 
-void print_radial_header(NIDS_radials *r, int ln) {
+void print_radial_header(NIDS_radials *r, char *prefix) {
 	int i;
-	printf("data.symb.layers[%i].rad.index_first_bin %i\n", ln, r->index_first_bin);
-	printf("data.symb.layers[%i].rad.num_bins %i\n", ln, r->num_bins);
-	printf("data.symb.layers[%i].rad.x_center %i\n", ln, r->x_center);
-	printf("data.symb.layers[%i].rad.y_center %i\n", ln, r->y_center);
-	printf("data.symb.layers[%i].rad.num_radials %i\n", ln, r->num_radials);
+	printf("%s.rad.index_first_bin %i\n", prefix, r->index_first_bin);
+	printf("%s.rad.num_bins %i\n", prefix, r->num_bins);
+	printf("%s.rad.x_center %i\n", prefix, r->x_center);
+	printf("%s.rad.y_center %i\n", prefix, r->y_center);
+	printf("%s.rad.num_radials %i\n", prefix, r->num_radials);
 	
 	for (i = 0 ; i < r->num_radials ; i++)
-		print_radial(r->radials + i, ln, i);
+		print_radial(r->radials + i, prefix, i);
 }
 
 #define PI 3.14159265
 
-void convert(float angle, float delta, int bin, int *x, int *y) {
+void radial_convert(float angle, float delta, int bin, int *x, int *y) {
 	float r_angle = angle * (PI / 180);
 	
 	*x = bin * cos(r_angle);
@@ -227,35 +228,30 @@ void convert(float angle, float delta, int bin, int *x, int *y) {
 	function to convert a single radial to a raster
 *******************************************************************************/
 
-void radial2raster (NIDS_radial *r, char *raster, int width, int height) {
+void radial_to_raster (NIDS_radial *r, char *raster, int x_center, int y_center) {
 	int x, y;
 	int i, j;
 	float k, angle;
 	int bin = 1;
 	
-	int xcenter = width / 2;
-	int ycenter = height / 2;
-		
 	for (i = 0 ; i < r->num_rle * 2 ; i++) {
 		for (j = 0 ; j < r->run[i] ; j++, bin++) {
-			for (k = 0 ; k <= r->delta ; k += 0.1) {
+			for (k = -(r->delta / 2) ; k <= r->delta / 2; k += 0.1) {
 				
 				if (r->start + k > 360)
 					angle = k;
 				else
 					angle = r->start + k;
 			
-				convert(angle , r->delta, bin, &x, &y);
+				radial_convert(angle , r->delta, bin, &x, &y);
 				
-				if (xcenter + x >= width || xcenter + x < 0)
-					fprintf(stderr, "WARNING: raster x value %i out of range, skipping\n", x + xcenter);
-				else if (ycenter + -y >= height || ycenter + -y < 0)
-					fprintf(stderr, "WARNING: raster x value %i out of range, skipping\n", y + ycenter);
+				if (x_center + x >= RASTER_X_SIZE || x_center + x < 0)
+					fprintf(stderr, "WARNING: raster x value %i out of range, skipping\n", x + x_center);
+				else if (y_center + -y >= RASTER_Y_SIZE || y_center + -y < 0)
+					fprintf(stderr, "WARNING: raster y value %i out of range, skipping\n", y + y_center);
 				
 				else {
-					//printf("raster[%i]\n", (x + xcenter) + (width * (y + ycenter)));
-					raster[(-x + xcenter) + (width * (y + ycenter))] = r->code[i];
-				//printf ("x=%i y=%i\n", x, y);
+					raster[(-x + x_center) + (RASTER_X_SIZE * (y + y_center))] = r->code[i];
 				}
 			}
 		}
@@ -265,16 +261,36 @@ void radial2raster (NIDS_radial *r, char *raster, int width, int height) {
 
 /*******************************************************************************
 	function to convert radials to a raster
+
+args:
+						r				the structure that holds the radials
+						width		pointer to return the width of the raster in
+						height	pointer to return the height of the raster in
+
+returns:
+						a char pointer to the raster data
+
 *******************************************************************************/
 
-void radials_to_raster (NIDS_radials *r,
-	char *raster,
-	int width,
-	int height)
+char *radials_to_raster (
+	NIDS_radials *r,
+	int *width,
+	int *height)
 {
 	int i;
+	char *raster = NULL;
+	
+	if (!(raster = calloc(RASTER_X_SIZE, RASTER_Y_SIZE)))
+		ERROR("radials_to_raster");
 	
 	for (i = 0 ; i < r->num_radials ; i++)
-		radial2raster(r->radials + i, raster, width, height);
+		radial_to_raster(r->radials + i,
+										 raster,
+										 r->x_center + RASTER_X_SIZE / 2,
+										 r->y_center + RASTER_Y_SIZE / 2);
 	
+	*width = RASTER_X_SIZE;
+	*height = RASTER_Y_SIZE;
+	
+	return raster;
 }

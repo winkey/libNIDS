@@ -43,9 +43,25 @@ libNIDS_la_SOURCES = \
 	circle.h       \
 	circle.c       \
 	text.h       \
-	compression.c       \
 	product_dependent_desc.c       \
-	product_dependent_desc.h
+	product_dependent_desc.h       \
+	color.c       \
+	color.h       \
+	storm_id.c       \
+	storm_id.h       \
+	forecast.h       \
+	forecast.c       \
+	linked_vector.c       \
+	linked_vector.h       \
+	error.h       \
+	graphic_alphanumeric.c       \
+	graphic_alphanumeric.h       \
+	tabular_alphanumeric.h       \
+	tabular_alphanumeric.c       \
+	v_linked_vector.c       \
+	v_linked_vector.h       \
+	v_text.h       \
+	v_text.c
 
 libNIDS_la_LDFLAGS = \
 	-lm           \

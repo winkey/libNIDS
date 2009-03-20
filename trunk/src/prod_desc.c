@@ -16,8 +16,11 @@
 
 #include <stdio.h>
 #include <time.h>
-#include "get.h"
+
 #include "../include/NIDS.h"
+#include "get.h"
+#include "prod_desc.h"
+#include "error.h"
 
 /*******************************************************************************
 2. Product Description Block

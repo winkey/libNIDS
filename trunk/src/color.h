@@ -14,13 +14,12 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor Boston, MA 02110-1301,  USA
  */
  
-#ifndef _PRODUCT_DEPENDENT_DESC_H
-#define _PRODUCT_DEPENDENT_DESC_H
+#ifndef _COLOR_H
+#define _COLOR_H
+
+void get_product_dependent_color(int msgcode, NIDS_color **result);
 
 
-void parse_product_dependent_desc(int msgcode, char *buf, prod_dep_desc *pdd);
-
-
-#endif /* _PRODUCT_DEPENDENT_DESC_H */
+#endif /* _COLOR_H */
 
  

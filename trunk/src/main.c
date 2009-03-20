@@ -28,14 +28,14 @@
 #include "prod_desc.h"
 #include "product_symbology.h"
 #include "product_dependent_desc.h"
+#include "color.h"
+#include "error.h"
 
 FILE *NIDS_open(char *filename) {
 	FILE *result = NULL;
 	
-	if (!(result = fopen(filename, "r"))) {
-		fprintf(stderr, "ERROR: NIDS_open : %s\n", strerror(errno));
-		exit(EXIT_FAILURE);
-	}
+	if (!(result = fopen(filename, "r")))
+		ERROR("NIDS_open");
 	
 	return result;
 }
@@ -53,27 +53,20 @@ void NIDS_read (FILE *fp, NIDS *data) {
 	char nws[100] = {};
 	char *bzbuf = NULL;
 	
-	if (!(buf = malloc(1024))) {
-
-		fprintf(stderr, "ERROR: NIDS_read : %s\n", strerror(errno));
-		exit(EXIT_FAILURE);
-	}
+	if (!(buf = malloc(1024)))
+		ERROR("NIDS_read");
 	
 	/***** read the tacked on nws header *****/
 	
-	if (!fread(nws, 30, 1, fp)) {
-		fprintf(stderr, "ERROR: NIDS_read : %s\n", strerror(errno));
-		exit(EXIT_FAILURE);
-	}
+	if (!fread(nws, 30, 1, fp))
+		ERROR("NIDS_read");
 		
 	printf("%s\n", nws);
 	
 	/***** read the first 18 *****/
 	
-	if (!fread(buf, 18, 1, fp)) {
-		fprintf(stderr, "ERROR: NIDS_read : %s\n", strerror(errno));
-		exit(EXIT_FAILURE);
-	}
+	if (!fread(buf, 18, 1, fp))
+		ERROR("NIDS_read");
 	
   p = parse_msg_header(buf, &(data->msg));
   
@@ -82,39 +75,32 @@ void NIDS_read (FILE *fp, NIDS *data) {
 	
 	
 	if (data->msg.len > 1024) {
-		if (!(nbuf = realloc(buf, data->msg.len))) {
-			fprintf(stderr, "ERROR: NIDS_read : %s\n", strerror(errno));
-			exit(EXIT_FAILURE);
-		}
+		if (!(nbuf = realloc(buf, data->msg.len)))
+			ERROR("NIDS_read");
 		
 		buf = nbuf;
 		p = buf + 18;
 	}
 	
-	if (!fread(buf + 18, data->msg.len - 18, 1, fp)) {
-		fprintf(stderr, "ERROR: NIDS_read : %s\n", strerror(errno));
-		exit(EXIT_FAILURE);
-	}
+	if (!fread(buf + 18, data->msg.len - 18, 1, fp))
+		ERROR("NIDS_read");
 	
 	parse_product_dependent_desc(data->msg.code, p, &(data->pdd));
 	
 	p = parse_prod_desc(p, &(data->prod));
 	
 	if (data->pdd.compression) {
-		if (!(bzbuf = malloc(data->pdd.uncompressed_size))) {
-			fprintf(stderr, "ERROR: NIDS_read : %s\n", strerror(errno));
-			exit(EXIT_FAILURE);
-		}
+		if (!(bzbuf = malloc(data->pdd.uncompressed_size)))
+			ERROR("NIDS_read");
 
 		if (0 > BZ2_bzBuffToBuffDecompress(bzbuf,
 															 &(data->pdd.uncompressed_size),
 															 p,
 															 data->msg.len - (p - buf),
 															 0,
-															 0)) {
-			fprintf(stderr, "ERROR: NIDS_read : bzip error\n");
-			exit(EXIT_FAILURE);
-		}
+															 0))
+			ERROR("NIDS_read : bzip error");
+
 		parse_product_symbology(bzbuf, &(data->symb));
 		free(bzbuf);
 	}
@@ -139,13 +125,24 @@ void NIDS_print(NIDS *data) {
 	print_product_symbology(&(data->symb));
 }
 
-void NIDS_to_raster(
+char *NIDS_to_raster(
 	NIDS *data,
-	char *raster,
-	int width,
-	int height)
+	int layer,
+	int *width,
+	int *height)
 {
 
-	product_symbology_to_raster(&(data->symb), raster, width, height);
+	return product_symbology_to_raster(&(data->symb), layer, width, height);
 	
 }
+
+void NIDS_get_color(
+	NIDS *data,
+	NIDS_color **colors)
+{
+	
+	get_product_dependent_color(data->msg.code, colors);
+	
+	return;
+}
+	

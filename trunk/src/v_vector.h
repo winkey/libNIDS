@@ -46,13 +46,13 @@ void free_v_vector_header(NIDS_v_vectors *v);
 
 args:
 						v				the structure the vectors is stored in
-						ln			the layer number
+						prefix	the start of the line
 
 returns:
 						nothing
 *******************************************************************************/
 
-void print_v_vector_header(NIDS_v_vectors *v, int ln);
+void print_v_vector_header(NIDS_v_vectors *v, char *prefix);
 
 #endif /* _V_VECTOR_H */
 

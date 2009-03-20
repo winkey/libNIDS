@@ -46,13 +46,13 @@ void free_precip_header(NIDS_precip *r);
 
 args:
 						b				the structure the percip is stored in
-						ln			the layer number
+						prefix	the start of the line
 
 returns:
 						nothing
 *******************************************************************************/
 
-void print_precip_header(NIDS_precip *r, int ln);
+void print_precip_header(NIDS_precip *r, char *prefix);
 
 #endif /* _PRECIP_H */
 

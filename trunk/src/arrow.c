@@ -17,12 +17,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
 #include <errno.h>
+#include <time.h>
 
-#include "get.h"
 #include "../include/NIDS.h"
+#include "get.h"
 #include "arrow.h"
+#include "error.h"
 
 /*******************************************************************************
 
@@ -82,10 +83,8 @@ char *parse_arrow_header(char *buf, NIDS_arrows *a) {
 	
 	a->length = GET2(buf);
 	a->num_arrows = a->length / 10;
-	if (!(a->arrows = malloc(a->num_arrows * sizeof(NIDS_arrow)))) {
-		fprintf(stderr, "ERROR: parse_arrow_header : %s\n", strerror(errno));
-		exit(EXIT_FAILURE);
-	}
+	if (!(a->arrows = malloc(a->num_arrows * sizeof(NIDS_arrow))))
+		ERROR("parse_arrow_header");
 	
 	p = buf + 2;
 	
@@ -117,20 +116,20 @@ void free_arrow_header(NIDS_arrows *a) {
 
 args:
 						a				the structure the arrow is stored in
-						ln			the layer number
+						prefix	the start of the line
 						rn			the arrow number
 
 returns:
 						nothing
 *******************************************************************************/
 
-void print_arrow(NIDS_arrow *a, int ln, int rn) {
+void print_arrow(NIDS_arrow *a, char *prefix, int rn) {
 	
-	printf("data.symb.layers[%i].arrow.arrows[%i].x_start %i\n", ln, rn, a->x_start);
-	printf("data.symb.layers[%i].arrow.arrows[%i].y_start %i\n", ln, rn, a->y_start);
-	printf("data.symb.layers[%i].arrow.arrows[%i].heading %i\n", ln, rn, a->heading);
-	printf("data.symb.layers[%i].arrow.arrows[%i].length %i\n", ln, rn, a->length);
-	printf("data.symb.layers[%i].arrow.arrows[%i].head_length %i\n", ln, rn, a->head_length);
+	printf("%s.arrow.arrows[%i].x_start %i\n", prefix, rn, a->x_start);
+	printf("%s.arrow.arrows[%i].y_start %i\n", prefix, rn, a->y_start);
+	printf("%s.arrow.arrows[%i].heading %i\n", prefix, rn, a->heading);
+	printf("%s.arrow.arrows[%i].length %i\n", prefix, rn, a->length);
+	printf("%s.arrow.arrows[%i].head_length %i\n", prefix, rn, a->head_length);
 	
 }
 	
@@ -139,20 +138,20 @@ void print_arrow(NIDS_arrow *a, int ln, int rn) {
 
 args:
 						a				the structure the arrows are stored in
-						ln			the layer number
+						prefix	the start of the line
 
 returns:
 						nothing
 *******************************************************************************/
 
-void print_arrow_header(NIDS_arrows *a, int ln) {
+void print_arrow_header(NIDS_arrows *a, char *prefix) {
 	int i;
 	
-	printf("data.symb.layers[%i].arr.length %i\n", ln, a->length);
-	printf("data.symb.layers[%i].arr.num_arrows %i\n", ln, a->num_arrows);
+	printf("%s.arrow.length %i\n", prefix, a->length);
+	printf("%s.arrow.num_arrows %i\n", prefix, a->num_arrows);
 	
 	for (i = 0 ; i < a->num_arrows ; i++)
-		print_arrow(a->arrows + i, ln, i);
+		print_arrow(a->arrows + i, prefix, i);
 	
 }
 

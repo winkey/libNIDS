@@ -54,7 +54,9 @@ libNIDS_la_LIBADD =
 am_libNIDS_la_OBJECTS = msg_header.lo prod_desc.lo \
 	product_symbology.lo radial.lo raster.lo main.lo arrow.lo \
 	vector.lo precip.lo text.lo barb.lo v_vector.lo d_radial.lo \
-	circle.lo compression.lo product_dependent_desc.lo
+	circle.lo product_dependent_desc.lo color.lo storm_id.lo \
+	forecast.lo linked_vector.lo graphic_alphanumeric.lo \
+	tabular_alphanumeric.lo v_linked_vector.lo v_text.lo
 libNIDS_la_OBJECTS = $(am_libNIDS_la_OBJECTS)
 libNIDS_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
@@ -226,9 +228,25 @@ libNIDS_la_SOURCES = \
 	circle.h       \
 	circle.c       \
 	text.h       \
-	compression.c       \
 	product_dependent_desc.c       \
-	product_dependent_desc.h
+	product_dependent_desc.h       \
+	color.c       \
+	color.h       \
+	storm_id.c       \
+	storm_id.h       \
+	forecast.h       \
+	forecast.c       \
+	linked_vector.c       \
+	linked_vector.h       \
+	error.h       \
+	graphic_alphanumeric.c       \
+	graphic_alphanumeric.h       \
+	tabular_alphanumeric.h       \
+	tabular_alphanumeric.c       \
+	v_linked_vector.c       \
+	v_linked_vector.h       \
+	v_text.h       \
+	v_text.c
 
 libNIDS_la_LDFLAGS = \
 	-lm           \
@@ -306,8 +324,11 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/arrow.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/barb.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/circle.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/compression.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/color.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/d_radial.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/forecast.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/graphic_alphanumeric.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/linked_vector.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/main.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/msg_header.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/precip.Plo@am__quote@
@@ -316,7 +337,11 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/product_symbology.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/radial.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/raster.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/storm_id.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tabular_alphanumeric.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/text.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/v_linked_vector.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/v_text.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/v_vector.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/vector.Plo@am__quote@
 

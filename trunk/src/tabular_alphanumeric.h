@@ -14,13 +14,17 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor Boston, MA 02110-1301,  USA
  */
  
-#ifndef _PRODUCT_DEPENDENT_DESC_H
-#define _PRODUCT_DEPENDENT_DESC_H
+#ifndef _TABULAR_ALPHANUMERIC_H
+#define _TABULAR_ALPHANUMERIC_H
+
+#include <glib.h>
+
+G_BEGIN_DECLS
 
 
-void parse_product_dependent_desc(int msgcode, char *buf, prod_dep_desc *pdd);
 
+G_END_DECLS
 
-#endif /* _PRODUCT_DEPENDENT_DESC_H */
+#endif /* _TABULAR_ALPHANUMERIC_H */
 
  
