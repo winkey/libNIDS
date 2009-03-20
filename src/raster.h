@@ -46,13 +46,13 @@ void free_raster_header(NIDS_raster *r);
 
 args:
 						r				the structure the raster is stored in
-						ln			the layer number
+						prefix	the start of the line
 
 returns:
 						nothing
 *******************************************************************************/
 
-void print_raster_header(NIDS_raster *r, int ln);
+void print_raster_header(NIDS_raster *r, char *prefix);
 
 #endif /* _RASTER_H */
 

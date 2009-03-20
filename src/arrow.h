@@ -46,13 +46,13 @@ void free_arrow_header(NIDS_arrows *a);
 
 args:
 						a				the structure the arrows are stored in
-						ln			the layer number
+						prefix	the start of the line
 
 returns:
 						nothing
 *******************************************************************************/
 
-void print_arrow_header(NIDS_arrows *a, int ln);
+void print_arrow_header(NIDS_arrows *a, char *prefix);
 
 #endif /* _ARROW_H */
 

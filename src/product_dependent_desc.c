@@ -16,8 +16,11 @@
 
 #include <stdio.h>
 #include <time.h>
-#include "get.h"
+
 #include "../include/NIDS.h"
+#include "get.h"
+#include "error.h"
+
 
 void parse_product_dependent_desc(int msgcode, char *buf, prod_dep_desc *pdd) {
 	
@@ -83,3 +86,4 @@ void parse_product_dependent_desc(int msgcode, char *buf, prod_dep_desc *pdd) {
 	
 	
 }
+

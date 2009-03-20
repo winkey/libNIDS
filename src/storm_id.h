@@ -14,47 +14,46 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor Boston, MA 02110-1301,  USA
  */
  
-#ifndef _CIRCLE_H
-#define _CIRCLE_H
+#ifndef _STORM_ID_H
+#define _STORM_ID_H
 
 /*******************************************************************************
-	function to parse a circle packet
+	function to parse a storm id packet
 	
-args:					buf			the buffer pointing to the start of the circle packet
-							c				the structure to store the circles in
+args:					buf			the buffer pointing to the start of the storm id packet
+							s				the structure to store the storm ids in
 
 returns:
 							pointer to the next byte in the buffer
 *******************************************************************************/
 
-char *parse_circle_header(char *buf, NIDS_circles *c);
+char *parse_storm_id_header(char *buf, NIDS_storm_ids *s);
 
 /*******************************************************************************
-	function to free any dynamicly alocated memory used in circle storage
+	function to free any dynamicly alocated memory used in storm_id storage
 
 args:
-						c			the structure the circles are stored in
+						s				the structure the storm_ids are stored in
 
 returns:
 						nothing
 *******************************************************************************/
 
-void free_circle_header(NIDS_circles *c);
+void free_storm_id_header(NIDS_storm_ids *s);
 
 /*******************************************************************************
-	function to print a circle packet
+	function to print a storm id packet
 
 args:
-						c				the structure the circles are stored in
+						s				the structure the storm ids are stored in
 						prefix	the start of the line
 
 returns:
 						nothing
 *******************************************************************************/
 
-void print_circle_header(NIDS_circles *c, char *prefix);
+void print_storm_id_header(NIDS_storm_ids *s, char *prefix);
 
-
-#endif /* _CIRCLE_H */
+#endif /* _STORM_ID_H */
 
  

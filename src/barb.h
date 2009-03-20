@@ -46,13 +46,13 @@ void free_barb_header(NIDS_barbs *b);
 
 args:
 						b				the structure the barbs are stored in
-						ln			the layer number
+						prefix	the start of the line
 
 returns:
 						nothing
 *******************************************************************************/
 
-void print_barb_header(NIDS_barbs *b, int ln);
+void print_barb_header(NIDS_barbs *b, char *prefix);
 
 #endif /* _BARBS_H */
 

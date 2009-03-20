@@ -17,12 +17,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
 #include <errno.h>
+#include <time.h>
 
-#include "get.h"
 #include "../include/NIDS.h"
-#include "product_symbology.h"
+#include "get.h"
 #include "radial.h"
 #include "raster.h"
 #include "arrow.h"
@@ -33,6 +32,13 @@
 #include "d_radial.h"
 #include "circle.h"
 #include "text.h"
+#include "v_text.h"
+#include "storm_id.h"
+#include "linked_vector.h"
+#include "v_linked_vector.h"
+#include "forecast.h"
+#include "product_symbology.h"
+#include "error.h"
 
 /*******************************************************************************
 Symbology Layer
@@ -109,8 +115,29 @@ char *parse_symbology_layer (char *buf, NIDS_symbology_layer *l) {
 			p = parse_text_header(p, &(l->text));
 			break;
 		
+		case V_TEXT:
+			p = parse_v_text_header(p, &(l->v_text));
+			break;
+		
+		case STORM_ID:
+			p = parse_storm_id_header(p, &(l->storm_id));
+			break;
+		
+		case LINKED_VECTOR:
+			p = parse_linked_vector_header(p, &(l->linked_vector));
+			break;
+		
+		case V_LINKED_VECTOR:
+			p = parse_v_linked_vector_header(p, &(l->v_linked_vector));
+			break;
+		
+		case FORECAST1:
+		case FORECAST2:
+			p = parse_forecast_header(p, &(l->forecast));
+			break;
+		
 		default:
-			printf("unknown symbology layer %04x\n", l->data_type);
+			printf("unknown symbology layer 0x%04x\n", l->data_type);
 						 
 	}
 	
@@ -149,10 +176,8 @@ char *parse_product_symbology(char *buf, NIDS_product_symbology *s) {
 	s->length = GET4(buf + 4);
 	s->num_layers = GET2(buf + 8);
 	
-	if (!(s->layers = malloc(s->num_layers * sizeof(NIDS_symbology_layer)))) {
-		fprintf(stderr, "ERROR: parse_product_symbology : %s\n", strerror(errno));
-		exit(EXIT_FAILURE);
-	}
+	if (!(s->layers = malloc(s->num_layers * sizeof(NIDS_symbology_layer))))
+		ERROR("parse_product_symbology");
 	
 	p = buf + 10;
 	
@@ -221,6 +246,27 @@ void free_symbology_layer (NIDS_symbology_layer *l) {
 			free_text_header(&(l->text));
 			break;
 		
+		case V_TEXT:
+			free_v_text_header(&(l->v_text));
+			break;
+		
+		case STORM_ID:
+			free_storm_id_header(&(l->storm_id));
+			break;
+		
+		case LINKED_VECTOR:
+			free_linked_vector_header(&(l->linked_vector));
+			break;
+		
+		case V_LINKED_VECTOR:
+			free_v_linked_vector_header(&(l->v_linked_vector));
+			break;
+		
+		case FORECAST1:
+		case FORECAST2:
+			free_forecast_header(&(l->forecast));
+			break;
+		
 		default:
 			printf("unknown symbology layer %04x\n", l->data_type);
 						 
@@ -258,57 +304,81 @@ returns:
 *******************************************************************************/
 
 void print_symbology_layer (NIDS_symbology_layer *l, int n) {
+	char prefix[PREFIX_LEN];
 	
 	printf ("data.symb.layers[%i].length %i\n", n, l->length);
 	printf("data.symb.layers[%i].data_type %04x\n", n, l->data_type);
 	
+	snprintf(prefix, PREFIX_LEN, "data.symb.layers[%i]", n);
+	
 	switch (l->data_type) {
 		case RADIAL:
-			print_radial_header(&(l->rad), n);
+			print_radial_header(&(l->rad), prefix);
 			break;
 		
 		case D_RADIAL:
-			print_d_radial_header(&(l->d_radial), n);
+			print_d_radial_header(&(l->d_radial), prefix);
 			break;
 		
 		case RASTER1:
 		case RASTER2:
-			print_raster_header(&(l->rast), n);
+			print_raster_header(&(l->rast), prefix);
 			break;
 		
 		case ARROW:
-			print_arrow_header(&(l->arrow), n);
+			print_arrow_header(&(l->arrow), prefix);
 			break;
 		
 		case BARB:
-			print_barb_header(&(l->barb), n);
+			print_barb_header(&(l->barb), prefix);
 			break;
 		
 		case PRECIP:
-			print_precip_header(&(l->precip), n);
+			print_precip_header(&(l->precip), prefix);
 			break;
 		
 		case VECTOR:
-			print_vector_header(&(l->vector), n);
+			print_vector_header(&(l->vector), prefix);
 			break;
 		
 		case V_VECTOR:
-			print_v_vector_header(&(l->v_vector), n);
+			print_v_vector_header(&(l->v_vector), prefix);
 			break;
 		
 		case CIRCLE1:
 		case CIRCLE2:
 		case CIRCLE3:
-			print_circle_header(&(l->circle), n);
+			print_circle_header(&(l->circle), prefix);
 			break;
 		
 		case TEXT1:
 		case TEXT2:
-			print_text_header(&(l->text), n);
+			print_text_header(&(l->text), prefix);
+			break;
+		
+		case V_TEXT:
+			print_v_text_header(&(l->v_text), prefix);
+			break;
+		
+		case STORM_ID:
+			print_storm_id_header(&(l->storm_id), prefix);
+			break;
+		
+		case LINKED_VECTOR:
+			print_linked_vector_header(&(l->linked_vector), prefix);
+			break;
+		
+		case V_LINKED_VECTOR:
+			print_v_linked_vector_header(&(l->v_linked_vector), prefix);
+			break;
+		
+		case FORECAST1:
+		case FORECAST2:
+			print_forecast_header(&(l->forecast), prefix);
 			break;
 		
 		default:
-			printf("unknown symbology layer %04x\n", l->data_type);
+			printf("unknown symbology layer 0x%04x\n", l->data_type);
 							 
 	}
 	
@@ -340,19 +410,20 @@ void print_product_symbology(NIDS_product_symbology *s) {
 	function to convert a symbology layer to a raster
 *******************************************************************************/
 
-void product_symbology_layer_to_raster (
+char *product_symbology_layer_to_raster (
 	NIDS_symbology_layer *l,
-	char *raster,
-	int width,
-	int height)
+	int *width,
+	int *height)
 {
+	char *result = NULL;
 	
 	switch (l->data_type) {
 		case RADIAL:
-			radials_to_raster(&(l->rad), raster, width, height);
+			result = radials_to_raster(&(l->rad), width, height);
 			break;
 		
 		case D_RADIAL:
+			result = d_radials_to_raster(&(l->d_radial), width, height);
 			break;
 		
 		case RASTER1:
@@ -387,6 +458,8 @@ void product_symbology_layer_to_raster (
 			printf("unknown symbology layer %04x\n", l->data_type);
 							 
 	}
+	
+	return result;
 }	
 
 /*******************************************************************************
@@ -399,25 +472,20 @@ returns:
 						nothing
 *******************************************************************************/
 
-void product_symbology_to_raster(
+char *product_symbology_to_raster(
 	NIDS_product_symbology *s,
-	char *raster,
-	int width,
-	int height)
+	int layer,
+	int *width,
+	int *height)
 {
-	int i;
+	char *result = NULL;
 	
-	for (i = 0 ; i < s->num_layers ; i++)
-		product_symbology_layer_to_raster(s->layers + i, raster, width, height);
+	if (layer - 1 < 0 || layer > s->num_layers) {
+		fprintf(stderr, "ERROR Layer %i not found\n", layer);
+		exit (EXIT_FAILURE);
+	}
 	
-}
-NIDS_symbology_layer *get_symbology_layer(NIDS_product_symbology *s, int layer) {
-	NIDS_symbology_layer *result = NULL;
-	
-	if (layer < s->num_layers || layer > s->num_layers)
-		fprintf (stderr, "WARNING: symbology layer %i not found\n", layer);
-	else
-		result = s->layers + (layer - 1);
+	result = product_symbology_layer_to_raster(s->layers + (layer - 1), width, height);
 	
 	return result;
 }

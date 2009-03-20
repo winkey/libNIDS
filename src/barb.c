@@ -18,12 +18,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
 #include <errno.h>
+#include <time.h>
+
+#include "../include/NIDS.h"
 
 #include "get.h"
 #include "../include/NIDS.h"
 #include "barb.h"
+#include "error.h"
 
 /*******************************************************************************
 Individual Barbs
@@ -82,10 +85,8 @@ char *parse_barb_header(char *buf, NIDS_barbs *b) {
 	
 	b->length = GET2(buf);
 	b->num_barbs = b->length / 10;
-	if (!(b->barbs = malloc(b->num_barbs * sizeof(NIDS_barb)))) {
-		fprintf(stderr, "ERROR: parse_barb_header : %s\n", strerror(errno));
-		exit(EXIT_FAILURE);
-	}
+	if (!(b->barbs = malloc(b->num_barbs * sizeof(NIDS_barb))))
+		ERROR("parse_barb_header");
 	
 	p = buf + 2;
 	
@@ -117,20 +118,20 @@ void free_barb_header(NIDS_barbs *b) {
 
 args:
 						b				the structure the barb is stored in
-						ln			the layer number
+						prefix	the start of the line
 						rn			the barb number
 
 returns:
 						nothing
 *******************************************************************************/
 
-void print_barb(NIDS_barb *b, int ln, int rn) {
+void print_barb(NIDS_barb *b, char *prefix, int rn) {
 	
-	printf("data.symb.layers[%i].barb.barbs[%i].value %i\n", ln, rn, b->value);
-	printf("data.symb.layers[%i].barb.barbs[%i].x_start %i\n", ln, rn, b->x_start);
-	printf("data.symb.layers[%i].barb.barbs[%i].y_start %i\n", ln, rn, b->y_start);
-	printf("data.symb.layers[%i].barb.barbs[%i].heading %i\n", ln, rn, b->heading);
-	printf("data.symb.layers[%i].barb.barbs[%i].speed %i\n", ln, rn, b->speed);
+	printf("%s.barb.barbs[%i].value %i\n", prefix, rn, b->value);
+	printf("%s.barb.barbs[%i].x_start %i\n", prefix, rn, b->x_start);
+	printf("%s.barb.barbs[%i].y_start %i\n", prefix, rn, b->y_start);
+	printf("%s.barb.barbs[%i].heading %i\n", prefix, rn, b->heading);
+	printf("%s.barb.barbs[%i].speed %i\n", prefix, rn, b->speed);
 	
 }
 
@@ -139,19 +140,18 @@ void print_barb(NIDS_barb *b, int ln, int rn) {
 
 args:
 						b				the structure the barbs are stored in
-						ln			the layer number
-
+						prefix	the start of the line
 returns:
 						nothing
 *******************************************************************************/
 
-void print_barb_header(NIDS_barbs *b, int ln) {
+void print_barb_header(NIDS_barbs *b, char *prefix) {
 	int i;
 	
-	printf("data.symb.layers[%i].barbs.length %i\n", ln, b->length);
-	printf("data.symb.layers[%i].barbs.num_barbs %i\n", ln, b->num_barbs);
+	printf("%s.barbs.length %i\n", prefix, b->length);
+	printf("%s.barbs.num_barbs %i\n", prefix, b->num_barbs);
 	
 	for (i = 0 ; i < b->num_barbs ; i++)
-		print_barb(b->barbs + i, ln, i);
+		print_barb(b->barbs + i, prefix, i);
 	
 }

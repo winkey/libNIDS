@@ -17,6 +17,8 @@
 #ifndef _RADIAL_H
 #define _RADIAL_H
 
+
+
 /*******************************************************************************
 	function to parse a radial packet
 	
@@ -46,22 +48,32 @@ void free_radial_header(NIDS_radials *r);
 
 args:
 						r				the structure the radials are stored in
-						ln			the layer number
+						prefix	the start of the line
+
 
 returns:
 						nothing
 *******************************************************************************/
 
-void print_radial_header(NIDS_radials *r, int ln);
+void print_radial_header(NIDS_radials *r, char *prefix);
 
 /*******************************************************************************
 	function to convert radials to a raster
+
+args:
+						r				the structure that holds the radials
+						width		pointer to return the width of the raster in
+						height	pointer to return the height of the raster in
+
+returns:
+						a char pointer to the raster data
+
 *******************************************************************************/
 
-void radials_to_raster (NIDS_radials *r,
-	char *raster,
-	int width,
-	int height);
+char *radials_to_raster (
+	NIDS_radials *r,
+	int *width,
+	int *height);
 
 #endif /* _RADIAL_H */
 

@@ -17,12 +17,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
 #include <errno.h>
+#include <time.h>
+
+#include "../include/NIDS.h"
 
 #include "get.h"
 #include "../include/NIDS.h"
 #include "circle.h"
+#include "error.h"
 
 
 
@@ -61,10 +64,8 @@ char *parse_circle_header(char *buf, NIDS_circles *c) {
 	
 	c->length = GET2(buf);
 	c->num_circles = c->length / 6;
-	if (!(c->circles = malloc(c->num_circles * sizeof(NIDS_circle)))) {
-		fprintf(stderr, "ERROR: parse_circle_header : %s\n", strerror(errno));
-		exit(EXIT_FAILURE);
-	}
+	if (!(c->circles = malloc(c->num_circles * sizeof(NIDS_circle))))
+		ERROR("parse_circle_header");
 	
 	p = buf + 2;
 	
@@ -96,18 +97,18 @@ void free_circle_header(NIDS_circles *c) {
 
 args:
 						c				the structure the circle is stored in
-						ln			the layer number
+						prefix	the start of the line
 						rn			the arrow number
 
 returns:
 						nothing
 *******************************************************************************/
 
-void print_circle(NIDS_circle *c, int ln, int rn) {
+void print_circle(NIDS_circle *c, char *prefix, int rn) {
 	
-	printf("data.symb.layers[%i].circle.circles[%i].x_start %i\n", ln, rn, c->x_start);
-	printf("data.symb.layers[%i].circle.circles[%i].y_start %i\n", ln, rn, c->y_start);
-	printf("data.symb.layers[%i].circle.circles[%i].radius %i\n", ln, rn, c->radius);
+	printf("%s.circle.circles[%i].x_start %i\n", prefix, rn, c->x_start);
+	printf("%s.circle.circles[%i].y_start %i\n", prefix, rn, c->y_start);
+	printf("%s.circle.circles[%i].radius %i\n", prefix, rn, c->radius);
 	
 }
 	
@@ -116,19 +117,19 @@ void print_circle(NIDS_circle *c, int ln, int rn) {
 
 args:
 						c				the structure the circles are stored in
-						ln			the layer number
+						prefix	the start of the line
 
 returns:
 						nothing
 *******************************************************************************/
 
-void print_circle_header(NIDS_circles *c, int ln) {
+void print_circle_header(NIDS_circles *c, char *prefix) {
 	int i;
 	
-	printf("data.symb.layers[%i].circle.length %i\n", ln, c->length);
-	printf("data.symb.layers[%i].circle.num_circles %i\n", ln, c->num_circles);
+	printf("%s.circle.length %i\n", prefix, c->length);
+	printf("%s.circle.num_circles %i\n", prefix, c->num_circles);
 	
 	for (i = 0 ; i < c->num_circles ; i++)
-		print_circle(c->circles + i, ln, i);
+		print_circle(c->circles + i, prefix, i);
 	
 }

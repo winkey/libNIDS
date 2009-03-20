@@ -17,9 +17,10 @@
 #include <stdio.h>
 #include <time.h>
 
-#include "get.h"
 #include "../include/NIDS.h"
+#include "get.h"
 #include "msg_header.h"
+#include "error.h"
 
 /*******************************************************************************
 1. Message Header Block

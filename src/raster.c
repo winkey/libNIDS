@@ -17,13 +17,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
 #include <errno.h>
+#include <time.h>
 
-#include "get.h"
 #include "../include/NIDS.h"
+#include "get.h"
 #include "raster.h"
+#include "error.h"
 
+#define RASTER_X_SIZE 4096
+#define RASTER_Y_SIZE 4096
 
 /*******************************************************************************
 
@@ -55,14 +58,11 @@ char *parse_raster_row(char *buf, NIDS_raster_row *r) {
 	
 	r->num_rle = GET2(buf);
 		
-	if (!(r->run = malloc(r->num_rle * 2))) {
-		fprintf(stderr, "ERROR: parse_raster_row : %s\n", strerror(errno));
-		exit(EXIT_FAILURE);
-	}
-	if (!(r->code = malloc(r->num_rle * 2))) {
-		fprintf(stderr, "ERROR: parse_raster_row : %s\n", strerror(errno));
-		exit(EXIT_FAILURE);
-	}
+	if (!(r->run = malloc(r->num_rle * 2)))
+		ERROR("parse_raster_row");
+	
+	if (!(r->code = malloc(r->num_rle * 2)))
+		ERROR("parse_raster_row");
 	
 	p = buf + 2;
 	
@@ -118,10 +118,8 @@ char *parse_raster_header(char *buf, NIDS_raster *r) {
 	r->num_rows = GET2(buf + 16);
 	r->packing = GET2(buf + 18);
 	
-	if (!(r->rows = malloc(r->num_rows * sizeof(NIDS_raster_row)))) {
-		fprintf(stderr, "ERROR: parse_radial_header : %s\n", strerror(errno));
-		exit(EXIT_FAILURE);
-	}
+	if (!(r->rows = malloc(r->num_rows * sizeof(NIDS_raster_row))))
+		ERROR("parse_radial_header");
 	
 	p = buf + 20;
 	
@@ -172,16 +170,16 @@ void free_raster_header(NIDS_raster *r) {
 
 args:
 						r				the structure the row is stored in
-						ln			the layer number
+						prefix	the start of the line
 						rn			the row number
 
 returns:
 						nothing
 *******************************************************************************/
 
-void print_row(NIDS_raster_row *r, int ln, int rn) {
+void print_row(NIDS_raster_row *r, char *prefix, int rn) {
 	
-	printf("data.symb.layers[%i].rast.rows[%i].num_rle %i\n", ln, rn, r->num_rle);
+	printf("%s.rast.rows[%i].num_rle %i\n", prefix, rn, r->num_rle);
 	
 }
 
@@ -190,22 +188,80 @@ void print_row(NIDS_raster_row *r, int ln, int rn) {
 
 args:
 						r				the structure the raster is stored in
-						ln			the layer number
+						prefix	the start of the line
 
 returns:
 						nothing
 *******************************************************************************/
 
-void print_raster_header(NIDS_raster *r, int ln) {
+void print_raster_header(NIDS_raster *r, char *prefix) {
 	int i;
 	
-	printf("data.symb.layers[%i].rast.x_start %i\n", ln, r->x_start);
-	printf("data.symb.layers[%i].rast.y_start %i\n", ln, r->y_start);
-	printf("data.symb.layers[%i].rast.num_rows %i\n", ln, r->num_rows);
+	printf("%s.rast.x_start %i\n", prefix, r->x_start);
+	printf("%s.rast.y_start %i\n", prefix, r->y_start);
+	printf("%s.rast.num_rows %i\n", prefix, r->num_rows);
 	
 	for (i = 0 ; i < r->num_rows ; i++)
-		print_row(r->rows + i, ln, i);
+		print_row(r->rows + i, prefix, i);
 
 }
 
+/*******************************************************************************
+	function to convert a single row to a raster
+*******************************************************************************/
+
+void row_to_raster (NIDS_raster_row *r, char *raster, int x_start, int y_start, int row) {
+	int x = 0, y = row;
+	int i, j;
+
+	
+	for (i = 0 ; i < r->num_rle * 2 ; i++) {
+		for (j = 0 ; j < r->run[i] ; j++) {
+				
+			if (x_start + x >= RASTER_X_SIZE)
+				fprintf(stderr, "WARNING: raster x value %i out of range, skipping\n", x + x_start);
+			else if (y_start + y >= RASTER_Y_SIZE)
+				fprintf(stderr, "WARNING: raster y value %i out of range, skipping\n", y + y_start);
+			
+			else {
+				raster[(x + x_start) + (RASTER_X_SIZE * (row + y_start))] = r->code[i];
+			}
+		x++;
+		}
+	}
+	
+}
+
+/*******************************************************************************
+	function to convert a raster to a raster
+
+args:
+						r				the structure that holds the radials
+						width		pointer to return the width of the raster in
+						height	pointer to return the height of the raster in
+
+returns:
+						a char pointer to the raster data
+
+*******************************************************************************/
+
+char *raster_to_raster (
+	NIDS_raster *r,
+	int *width,
+	int *height)
+{
+	int i;
+	char *raster = NULL;
+	
+	if (!(raster = calloc(RASTER_X_SIZE, RASTER_Y_SIZE)))
+		ERROR("raster_to_raster");
+	
+	for (i = 0 ; i < r->num_rows ; i++)
+		row_to_raster(r->rows + i, raster, r->x_start + 2048, r->y_start + 2048, i);
+	
+	*width = RASTER_X_SIZE;
+	*height = RASTER_Y_SIZE;
+	
+	return raster;
+}
 

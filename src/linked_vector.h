@@ -14,47 +14,47 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor Boston, MA 02110-1301,  USA
  */
  
-#ifndef _CIRCLE_H
-#define _CIRCLE_H
+#ifndef _LINKED_VECTOR_H
+#define _LINKED_VECTOR_H
 
 /*******************************************************************************
-	function to parse a circle packet
+	function to parse an linked vector packet
 	
-args:					buf			the buffer pointing to the start of the circle packet
-							c				the structure to store the circles in
+args:					buf			the buffer pointing to the start of the vector packet
+							v				the structure to store the vectors in
 
 returns:
 							pointer to the next byte in the buffer
 *******************************************************************************/
 
-char *parse_circle_header(char *buf, NIDS_circles *c);
+char *parse_linked_vector_header(char *buf, NIDS_linked_vectors *v);
 
 /*******************************************************************************
-	function to free any dynamicly alocated memory used in circle storage
+	function to free any dynamicly alocated memory used in linked vector storage
 
 args:
-						c			the structure the circles are stored in
+						v				the structure the vector is stored in
 
 returns:
 						nothing
 *******************************************************************************/
 
-void free_circle_header(NIDS_circles *c);
+void free_linked_vector_header(NIDS_linked_vectors *v);
 
 /*******************************************************************************
-	function to print a circle packet
+	function to print a linked vector packet
 
 args:
-						c				the structure the circles are stored in
+						v				the structure the vectors is stored in
 						prefix	the start of the line
 
 returns:
 						nothing
 *******************************************************************************/
 
-void print_circle_header(NIDS_circles *c, char *prefix);
+void print_linked_vector_header(NIDS_linked_vectors *v, char *prefix);
 
 
-#endif /* _CIRCLE_H */
+#endif /* _LINKED_VECTOR_H */
 
  

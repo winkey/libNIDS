@@ -14,47 +14,46 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor Boston, MA 02110-1301,  USA
  */
  
-#ifndef _CIRCLE_H
-#define _CIRCLE_H
+#ifndef _V_TEXT_H
+#define _V_TEXT_H
 
 /*******************************************************************************
-	function to parse a circle packet
+	function to parse a valued text packet
 	
-args:					buf			the buffer pointing to the start of the circle packet
-							c				the structure to store the circles in
+args:					buf			the buffer pointing to the start of the text packet
+							t				the structure to store the text in
 
 returns:
 							pointer to the next byte in the buffer
 *******************************************************************************/
 
-char *parse_circle_header(char *buf, NIDS_circles *c);
+char *parse_v_text_header(char *buf, NIDS_v_text *t);
 
 /*******************************************************************************
-	function to free any dynamicly alocated memory used in circle storage
+	function to free any dynamicly alocated memory used in text storage
 
 args:
-						c			the structure the circles are stored in
+						t				the structure the text is stored in
 
 returns:
 						nothing
 *******************************************************************************/
 
-void free_circle_header(NIDS_circles *c);
+void free_v_text_header(NIDS_v_text *t);
 
 /*******************************************************************************
-	function to print a circle packet
+	function to print a valued text packet
 
 args:
-						c				the structure the circles are stored in
+						t				the structure the text is stored in
 						prefix	the start of the line
 
 returns:
 						nothing
 *******************************************************************************/
 
-void print_circle_header(NIDS_circles *c, char *prefix);
+void print_v_text_header(NIDS_v_text *t, char *prefix);
 
-
-#endif /* _CIRCLE_H */
+#endif /* _V_TEXT_H */
 
  
