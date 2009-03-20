@@ -1,6 +1,5 @@
 
 bin_PROGRAMS = \
-	nids2raster\
 	nidsinfo \
 	NIDS2gdal
 

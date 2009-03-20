@@ -142,6 +142,10 @@ void NIDS_read (FILE *fp, NIDS *data) {
 	/***** parse the header *****/
 	
   p = parse_msg_header(p, &(data->msg));
+	
+	/***** prod info *****/
+	
+	data->info = get_prod_info(data->msg.code);
  
 	/***** parse prod dep desc *****/
 	

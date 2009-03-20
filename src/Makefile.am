@@ -85,7 +85,9 @@ libNIDS_la_SOURCES = \
 	mesocyclone.h       \
 	proj.c       \
 	myzlib.c       \
-	myzlib.h
+	myzlib.h       \
+	prod_info.c       \
+	prod_info.h
 
 libNIDS_la_LDFLAGS =           \
 	-lm           \

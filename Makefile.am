@@ -6,7 +6,8 @@ SUBDIRS = src \
 	apps  \
 	share  \
 	scripts  \
-	etc
+	etc  \
+	kml
 
 libnidsdocdir = ${prefix}/doc/libnids
 libnidsdoc_DATA = \
