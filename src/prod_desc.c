@@ -166,36 +166,37 @@ void free_prod_desc(NIDS_prod_desc *d) {
 
 args:
 						d				the structure the product desc is stored in
+						prefix	the start of the line
 
 returns:
 						nothing
 *******************************************************************************/
 
-void print_prod_desc(NIDS_prod_desc *d) {
+void print_prod_desc(NIDS_prod_desc *d, char *prefix) {
 	int i;
 
-	printf("data.prod.lat %f\n", d->lat);
-	printf("data.prod.lon %f\n", d->lon);
-	printf("data.prod.elev %i\n", d->elev);
-	printf("data.prod.codes %i\n", d->code);
-	printf("data.prod.mode %i\n", d->mode);
-	printf("data.prod.vol_scan_pat %i\n", d->vol_scan_pat);
-	printf("data.prod.seq_num %i\n", d->seq_num);
-	printf("data.prod.scan_num %i\n", d->scan_num);
-	printf("data.prod.scan_time %lu\n", d->scan_time);
-	printf("data.prod.prod_time %lu\n", d->prod_time);
+	printf("%s.prod.lat %f\n", prefix, d->lat);
+	printf("%s.prod.lon %f\n", prefix, d->lon);
+	printf("%s.prod.elev %i\n", prefix, d->elev);
+	printf("%s.prod.codes %i\n", prefix, d->code);
+	printf("%s.prod.mode %i\n", prefix, d->mode);
+	printf("%s.prod.vol_scan_pat %i\n", prefix, d->vol_scan_pat);
+	printf("%s.prod.seq_num %i\n", prefix, d->seq_num);
+	printf("%s.prod.scan_num %i\n", prefix, d->scan_num);
+	printf("%s.prod.scan_time %lu\n", prefix, d->scan_time);
+	printf("%s.prod.prod_time %lu\n", prefix, d->prod_time);
 	
 	for (i = 0 ; i < 10 ; i++)
-		printf("data.prod.codes[%i] %i\n", i, d->codes[i]);
+		printf("%s.prod.codes[%i] %i\n", prefix, i, d->codes[i]);
 	
-	printf("data.prod.elev_num %i\n", d->elev_num);
+	printf("%s.prod.elev_num %i\n", prefix, d->elev_num);
 				 
 	for (i = 0 ; i < 16 ; i++)
-		printf("data.prod.thresholds[%i] %i\n", i, d->thresholds[i]);
+		printf("%s.prod.thresholds[%i] %i\n", prefix, i, d->thresholds[i]);
 	
-	printf("data.prod.num_maps %i\n", d->num_maps);
-	printf("data.prod.sybol_off %u\n", d->symbol_off);
-	printf("data.prod.graph_off %u\n", d->graph_off);
-	printf("data.prod.tab_off %u\n", d->tab_off);
+	printf("%s.prod.num_maps %i\n", prefix, d->num_maps);
+	printf("%s.prod.sybol_off %u\n", prefix, d->symbol_off);
+	printf("%s.prod.graph_off %u\n", prefix, d->graph_off);
+	printf("%s.prod.tab_off %u\n", prefix, d->tab_off);
 }
 

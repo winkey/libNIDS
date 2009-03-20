@@ -22,11 +22,9 @@
 
 #include "../include/NIDS.h"
 #include "get.h"
+#include "image.h"
 #include "raster.h"
 #include "error.h"
-
-#define RASTER_X_SIZE 4096
-#define RASTER_Y_SIZE 4096
 
 /*******************************************************************************
 
@@ -210,22 +208,14 @@ void print_raster_header(NIDS_raster *r, char *prefix) {
 	function to convert a single row to a raster
 *******************************************************************************/
 
-void row_to_raster (NIDS_raster_row *r, char *raster, int x_start, int y_start, int row) {
+void row_to_raster (NIDS_raster_row *r, NIDS_image *im, int row) {
 	int x = 0, y = row;
 	int i, j;
 
 	
-	for (i = 0 ; i < r->num_rle * 2 ; i++) {
+	for (i = 0 ; i < r->num_rle ; i++) {
 		for (j = 0 ; j < r->run[i] ; j++) {
-				
-			if (x_start + x >= RASTER_X_SIZE)
-				fprintf(stderr, "WARNING: raster x value %i out of range, skipping\n", x + x_start);
-			else if (y_start + y >= RASTER_Y_SIZE)
-				fprintf(stderr, "WARNING: raster y value %i out of range, skipping\n", y + y_start);
-			
-			else {
-				raster[(x + x_start) + (RASTER_X_SIZE * (row + y_start))] = r->code[i];
-			}
+			plot(im, x, y, r->code[i]);
 		x++;
 		}
 	}
@@ -245,23 +235,17 @@ returns:
 
 *******************************************************************************/
 
-char *raster_to_raster (
-	NIDS_raster *r,
-	int *width,
-	int *height)
+void rasters_to_raster (
+	NIDS_image *im,
+	NIDS_raster *r)
 {
 	int i;
-	char *raster = NULL;
 	
-	if (!(raster = calloc(RASTER_X_SIZE, RASTER_Y_SIZE)))
-		ERROR("raster_to_raster");
+	im->x_center = r->x_start;
+	im->y_center = r->y_start;
 	
 	for (i = 0 ; i < r->num_rows ; i++)
-		row_to_raster(r->rows + i, raster, r->x_start + 2048, r->y_start + 2048, i);
+		row_to_raster(r->rows + i, im, i);
 	
-	*width = RASTER_X_SIZE;
-	*height = RASTER_Y_SIZE;
-	
-	return raster;
 }
 

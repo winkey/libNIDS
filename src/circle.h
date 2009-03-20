@@ -54,6 +54,22 @@ returns:
 
 void print_circle_header(NIDS_circles *c, char *prefix);
 
+/*******************************************************************************
+	fuction to draw a circle in an image
+
+args:
+						raster	pointer to the raster
+						v				the structure that holds the circles
+						xcenter	the x axis center in the raster
+						ycenter	the y axis center in the raster
+
+returns:
+						nothing
+*******************************************************************************/
+
+void circles_to_raster (
+	NIDS_image *im,
+	NIDS_circles *c);
 
 #endif /* _CIRCLE_H */
 

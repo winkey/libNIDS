@@ -21,9 +21,8 @@
 #include <errno.h>
 #include <time.h>
 
-#include "../include/NIDS.h"
-
 #include "get.h"
+#include "image.h"
 #include "../include/NIDS.h"
 #include "barb.h"
 #include "error.h"
@@ -155,3 +154,36 @@ void print_barb_header(NIDS_barbs *b, char *prefix) {
 		print_barb(b->barbs + i, prefix, i);
 	
 }
+
+void barb_to_raster(NIDS_image *im, NIDS_barb *b) {
+	
+	draw_barb(im, b->x_start, b->y_start, b->heading, b->speed);
+	
+}
+
+/*******************************************************************************
+	fuction to draw a barb in an image
+
+args:
+						raster	pointer to the raster
+						v				the structure that holds the circles
+						xcenter	the x axis center in the raster
+						ycenter	the y axis center in the raster
+
+returns:
+						nothing
+*******************************************************************************/
+
+void barbs_to_raster (
+	NIDS_image *im,
+	NIDS_barbs *b)
+{
+	int i;
+	
+	for (i = 0 ; i < b->num_barbs ; i++) {
+		barb_to_raster(im, b->barbs + i);
+	}
+	
+}
+
+

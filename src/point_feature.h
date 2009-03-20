@@ -14,63 +14,61 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor Boston, MA 02110-1301,  USA
  */
  
-#ifndef _V_TEXT_H
-#define _V_TEXT_H
+#ifndef _POINT_FEATURE_H
+#define _POINT_FEATURE_H
 
 /*******************************************************************************
-	function to parse a valued text packet
+	function to parse a point feature packet
 	
-args:					buf			the buffer pointing to the start of the text packet
-							t				the structure to store the text in
+args:					buf			the buffer pointing to the start of the point feature packet
+							p				the structure to store the points in
 
 returns:
 							pointer to the next byte in the buffer
 *******************************************************************************/
 
-char *parse_v_text_header(char *buf, NIDS_v_text *t);
+char *parse_point_feature_header(char *buf, NIDS_point_features *p);
 
 /*******************************************************************************
-	function to free any dynamicly alocated memory used in text storage
+	function to free any dynamicly alocated memory used in point feature storage
 
 args:
-						t				the structure the text is stored in
+						p				the structure the points are stored in
 
 returns:
 						nothing
 *******************************************************************************/
 
-void free_v_text_header(NIDS_v_text *t);
+void free_point_feature_header(NIDS_point_features *p);
 
 /*******************************************************************************
-	function to print a valued text packet
+	function to print a point feature packet
 
 args:
-						t				the structure the text is stored in
+						p				the structure the points are stored in
 						prefix	the start of the line
 
 returns:
 						nothing
 *******************************************************************************/
 
-void print_v_text_header(NIDS_v_text *t, char *prefix);
+void print_point_feature_header(NIDS_point_features *p, char *prefix);
 
 /*******************************************************************************
-	fuction to draw a v_text in an image
+	fuction to draw point feature in an image
 
 args:
-						raster	pointer to the raster
-						t				the structure that holds the text
-						xcenter	the x axis center in the raster
-						ycenter	the y axis center in the raster
+						im			pointer to the raster struct
+						p				the structure that holds the point features
 
 returns:
 						nothing
 *******************************************************************************/
 
-void v_texts_to_raster (
+void point_features_to_raster (
 	NIDS_image *im,
-	NIDS_v_text *t);
+	NIDS_point_features *p);
 
-#endif /* _V_TEXT_H */
+#endif /* _POINT_FEATURE_H */
 
  

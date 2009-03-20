@@ -54,6 +54,22 @@ returns:
 
 void print_vector_header(NIDS_vectors *v, char *prefix);
 
+/*******************************************************************************
+	fuction to draw a vector in an image
+
+args:
+						raster	pointer to the raster
+						v				the structure that holds the vectors
+						xcenter	the x axis center in the raster
+						ycenter	the y axis center in the raster
+
+returns:
+						nothing
+*******************************************************************************/
+
+void vectors_to_raster (
+	NIDS_image *im,
+	NIDS_vectors *v);
 
 #endif /* _VECTOR_H */
 

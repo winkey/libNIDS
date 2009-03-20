@@ -54,6 +54,23 @@ returns:
 
 void print_raster_header(NIDS_raster *r, char *prefix);
 
+/*******************************************************************************
+	function to convert a raster to a raster
+
+args:
+						r				the structure that holds the radials
+						width		pointer to return the width of the raster in
+						height	pointer to return the height of the raster in
+
+returns:
+						a char pointer to the raster data
+
+*******************************************************************************/
+
+void rasters_to_raster (
+	NIDS_image *im,
+	NIDS_raster *r);
+
 #endif /* _RASTER_H */
 
  

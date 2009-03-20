@@ -54,6 +54,23 @@ returns:
 
 void print_text_header(NIDS_text *t, char *prefix);
 
+/*******************************************************************************
+	fuction to draw a text in an image
+
+args:
+						raster	pointer to the raster
+						t				the structure that holds the text
+						xcenter	the x axis center in the raster
+						ycenter	the y axis center in the raster
+
+returns:
+						nothing
+*******************************************************************************/
+
+void texts_to_raster (
+	NIDS_image *im,
+	NIDS_text *t);
+
 #endif /* _TEXT_H */
 
  

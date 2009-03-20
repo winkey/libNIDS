@@ -54,6 +54,23 @@ returns:
 
 void print_barb_header(NIDS_barbs *b, char *prefix);
 
+/*******************************************************************************
+	fuction to draw barbs in an image
+
+args:
+						raster	pointer to the raster
+						v				the structure that holds the circles
+						xcenter	the x axis center in the raster
+						ycenter	the y axis center in the raster
+
+returns:
+						nothing
+*******************************************************************************/
+
+void barbs_to_raster (
+	NIDS_image *im,
+	NIDS_barbs *b);
+
 #endif /* _BARBS_H */
 
  

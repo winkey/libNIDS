@@ -60,25 +60,20 @@ int main (int argc, char **argv) {
 	NIDS_color *colors = NULL;
 	char pixel;
 
-	if (argc < 4 || argc > 4) {
-		fprintf (stderr, "USAGE: %s <layernumber> <nidsfile> <tifffile>\n", argv[0]);
+	if (argc < 3 || argc > 3) {
+		fprintf (stderr, "USAGE: %s <nidsfile> <tifffile>\n", argv[0]);
 		exit(EXIT_FAILURE);
 	}
 	
-	if (!sscanf(argv[1], "%i", &layer)) {
-		fprintf (stderr, "USAGE: %s <layernumber> <nidsfile> <tifffile>\n", argv[0]);
-		exit(EXIT_FAILURE);
-	}
+	nids_fp = NIDS_open(argv[1]);
 	
-	nids_fp = NIDS_open(argv[2]);
-	
-	tiff = tiff_open(argv[3]);
+	tiff = tiff_open(argv[2]);
 	
 	NIDS_read(nids_fp, &data);
 	
 	//print_nids(&data);
 	
-	rast = NIDS_to_raster(&data, layer, &width, &height);
+	rast = NIDS_to_raster(&data, &width, &height);
 	
 	tiff_setfields(tiff, width, height);
 	
@@ -120,7 +115,23 @@ Step 5: Having completely defined the Raster & Model coordinate system,
 	for (i = 0; i < height; i++) {
 		for (j = 0; j < width ; j++) {
 			pixel = rast[j + i * width];
-			memcpy(&line[j * 4], colors[(int)pixel].codes, 4);
+			if (colors) {
+				memcpy(&line[j * 4], colors[(int)pixel].codes, 4);
+			}
+			else if (pixel) {
+				line[j * 4] = 0xff;
+				line[j * 4 + 1] = 0xff;
+				line[j * 4 + 2] = 0xff;
+				line[j * 4 + 3] = 0xff;
+			}
+			else {
+				line[j * 4] = 0x00;
+				line[j * 4 + 1] = 0x00;
+				line[j * 4 + 2] = 0x00;
+				line[j * 4 + 3] = 0x00;
+			}
+			
+				
 			
 		}
 		if (0 > TIFFWriteScanline(tiff, line, i, 0)) {

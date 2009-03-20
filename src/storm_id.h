@@ -54,6 +54,22 @@ returns:
 
 void print_storm_id_header(NIDS_storm_ids *s, char *prefix);
 
+/*******************************************************************************
+	fuction to draw a storm id in an image
+
+args:
+						t				the structure that holds the storm id
+						width		pointer to return the width of the raster in
+						height	pointer to return the height of the raster in
+
+returns:
+						a char pointer to the raster data
+*******************************************************************************/
+
+void storm_ids_to_raster (
+	NIDS_image *im,
+	NIDS_storm_ids *s);
+
 #endif /* _STORM_ID_H */
 
  

@@ -22,6 +22,7 @@
 
 #include "../include/NIDS.h"
 #include "get.h"
+#include "image.h"
 #include "circle.h"
 #include "text.h"
 #include "linked_vector.h"
@@ -97,6 +98,8 @@ char *parse_forecast_header(char *buf, NIDS_forecasts *f) {
 	f->length = GET2(buf);
 	
 	p = buf + 2;
+	f->num_forecasts = 0;
+	f->forecasts = NULL;
 	
 	for (i = 0; p - buf + 2 < f->length; i++) {
 		f->num_forecasts++;
@@ -129,7 +132,7 @@ void free_forecast (NIDS_forecast *f) {
 			free_circle_header(&(f->circle));
 			break;
 		
-		case TEXT1:
+		case TEXT2:
 			free_text_header(&(f->text));
 			break;
 		
@@ -183,7 +186,7 @@ void print_forecast(NIDS_forecast *f, char *prefix, int rn) {
 			print_circle_header(&(f->circle), prefix);
 			break;
 		
-		case TEXT1:
+		case TEXT2:
 			print_text_header(&(f->text), prefix);
 			break;
 		
@@ -192,7 +195,7 @@ void print_forecast(NIDS_forecast *f, char *prefix, int rn) {
 			break;
 		
 		default:
-			printf("unknown symbology layer 0x%04x\n", f->data_type);
+			printf("unknown forecast layer 0x%04x\n", f->data_type);
 							 
 	}
 	
@@ -218,7 +221,69 @@ void print_forecast_header(NIDS_forecasts *f, char *prefix) {
 	
 	for (i = 0 ; i < f->num_forecasts ; i++) {
 		snprintf(myprefix, PREFIX_LEN, "%s.forecast.forecasts[%i]", prefix, i);
-		print_forecast(f->forecasts + i, prefix, i);
+		print_forecast(f->forecasts + i, myprefix, i);
+	}
+	
+}
+
+/*******************************************************************************
+	fuction to draw fa singel forecast layer in an image
+
+args:
+						raster	pointer to the raster
+						f				the structure that holds the forcast
+						xcenter	the x axis center in the raster
+						ycenter	the y axis center in the raster
+
+returns:
+						nothing
+*******************************************************************************/
+
+void forecast_to_raster (
+	NIDS_image *im,
+	NIDS_forecast *f)
+{
+	switch (f->data_type) {
+		case CIRCLE3:
+			circles_to_raster(im, &(f->circle));
+			break;
+		
+		case TEXT2:
+			texts_to_raster(im, &(f->text));
+			break;
+		
+		case LINKED_VECTOR:
+			linked_vectors_to_raster(im, &(f->linked_vector));
+			break;
+		
+		default:
+			printf("unknown forecast layer 0x%04x\n", f->data_type);
+							 
+	}
+	
+}
+
+/*******************************************************************************
+	fuction to draw forcasts in an image
+
+args:
+						raster	pointer to the raster
+						f				the structure that holds the forcasts
+						xcenter	the x axis center in the raster
+						ycenter	the y axis center in the raster
+
+returns:
+						nothing
+*******************************************************************************/
+
+void forecasts_to_raster (
+	NIDS_image *im,
+	NIDS_forecasts *f)
+{
+	int i;
+	
+	for (i = 0 ; i < f->num_forecasts ; i++) {
+		forecast_to_raster(im, f->forecasts + i);
 	}
 	
 }

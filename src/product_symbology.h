@@ -30,6 +30,19 @@ returns:
 char *parse_product_symbology(char *buf, NIDS_product_symbology *s);
 
 /*******************************************************************************
+	function to check if a block is a product_symbology block
+	
+args:
+					buf 				the buffer pointing to the start of the block
+
+returns:
+					1 	if the block is a product_symbology block
+					0		if it is not
+*******************************************************************************/
+
+int is_product_symbology(char *buf);
+
+/*******************************************************************************
 	function to free any dynamicly alocated memory used in product symbology storage
 
 args:
@@ -46,12 +59,13 @@ void free_product_symbology(NIDS_product_symbology *s);
 
 args:
 						s				the structure the product desc is stored in
+						prefix	the start of the line
 
 returns:
 						nothing
 *******************************************************************************/
 
-void print_product_symbology(NIDS_product_symbology *s);
+void print_product_symbology(NIDS_product_symbology *s, char *prefix);
 
 /*******************************************************************************
 	function to convert the symbology block to a raster
@@ -63,11 +77,9 @@ returns:
 						nothing
 *******************************************************************************/
 
-char *product_symbology_to_raster(
-	NIDS_product_symbology *s,
-	int layer,
-	int *width,
-	int *height);
+void product_symbology_to_raster(
+	NIDS_image *im,
+	NIDS_product_symbology *s);
 
 #endif /* _PRODUCT_SYMBOLOGY_H */
 
