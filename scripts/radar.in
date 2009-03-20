@@ -18,6 +18,9 @@ source /etc/profile
 
 srs="+proj=latlong +datum=WGS84"
 
+station=$5
+prod=$2
+
 ##### time #####
 
 period=10
@@ -45,22 +48,22 @@ fi
 
 ##### files #####
 
-prodlower=`echo "$2" | tr [A-Z] [a-z]`
+prodlower=`echo "$prod" | tr [A-Z] [a-z]`
 
 nids="$1"
 
-tmpkml="/tmp/${2}.kml"
-kml="$kmldisk/${2}.kml"
+tmpkml="/tmp/${prod}.kml"
+kml="$kmldisk/${prod}.kml"
 
-tiff="/tmp/${2}.${3}.${4}.${5}.tiff"
-warp="$wwwdisk/${2}.$newfdate.${5}.tiff"
+tiff="/tmp/${prod}.${3}.${4}.${station}.tiff"
+warp="$wwwdisk/${prod}.$newfdate.${station}.tiff"
 basewarp=$(basename "$warp")
 
-tmp_tindex="/tmp/${2}"
-tindex="$wwwdisk/${2}"
-sqltindex="/tmp/${2}.sqlite"
+tmp_tindex="/tmp/${prod}"
+tindex="$wwwdisk/${prod}"
+sqltindex="/tmp/${prod}.sqlite"
 
-mapfile="$wwwdisk/${2}.map"
+mapfile="$wwwdisk/${prod}.map"
 
 ##### decode #####
 
@@ -80,18 +83,11 @@ fi
 
 cd "${wwwdisk}/"
 
-lastimg=$(ogrinfo "$2.shp" $prodlower |\
+lastimg=$(ogrinfo "$prod.shp" $prodlower |\
 					 grep -e $d -A2 |\
 					 tail -n 3 |\
 					 grep -e location |\
 					 sed 's/.*= //')
-
-lasttime=$(date "+%s" "-d "$(ogrinfo "$2.shp" $prodlower |\
-														  grep -e EAST-CONUS -A2 |\
-														  tail -n 3 |\
-														  grep -e time |\
-														  sed 's/.*= //') UTC")
-
 
 difftime=$(($unixtime - $lasttime))
 
@@ -100,30 +96,51 @@ then
 	difftime=$period
 fi
 
-for t in `seq $((lasttime + 60)) 60 $unixtime`
-do
+##### does the db need setup? #####
+
+if createdb radar
+then
+	createlang plpgsql radar
+	psql -d radar -f /usr/share/lwpostgis.sql
+	psql -d radar -f /usr/share/spatial_ref_sys.sql
+fi
+
+psql radar -c "CREATE TABLE $prodlower (ogc_fid integer, \
+															wkb_geometry geometry, \
+															location character(512), \
+															time timestamp);"
+
+##### if there is already a image for this station dupe #####
+
+if lasttime=$(psql -d radar -c "SELECT time from $prodlower \
+																	WHERE location LIKE '%${station}%' \
+																	ORDER BY time desc \
+																	LIMIT 1;")
+then
 	
-
-
-
-nice -n 5 gdaltindex "$tmp_tindex.shp" "$basewarp"
-
-nice -n 5 ogr2ogr -f SQLite -dsco METADATA=yes/no "$sqltindex" "$tmp_tindex.shp"
-
-sqlite3 "$sqltindex" "ALTER TABLE '$prodlower' ADD 'time' DATE;"
-sqlite3 "$sqltindex" "UPDATE '$prodlower' SET 'time' = datetime('$time');"
-
-if [[ ! -f "$2.shp" ]]
-then
-        ogr2ogr "$2.shp" "$sqltindex"
-else
-        ogr2ogr -update -append "$2.shp" "$sqltindex"
+	for t in `seq $(($(date "+%s" -d "$lasttime UTC") + 60)) 60 $unixtime`
+	do
+		psql -d radar -f -c "INSERT INTO $prodlower (wkb_geometry, location, time) \
+													SELECT wkb_geometry, location, time + interval '1 minutes' \
+														FROM radar \
+														WHERE location \
+														LIKE '%${station}%' \
+														ORDER BY time desc \
+														LIMIT 1;"
+	done
 fi
 
-if [[ -f "$sqltindex" ]]
-then
-        rm "$sqltindex"
-fi
+##### add the tindex for this image #####
+
+gdaltindex "$tmp_tindex.shp" "$warp"
+ogr2ogr -update -append -f PostgreSQL PG:dbname=radar "$tmp_tindex.shp"
+
+##### add the timestamp to the new tindex #####
+
+psql -d radar -f -c "UPDATE $prodlower SET \
+											time = '$time' \
+											WHERE location = '$warp';"
+
 
 if [[ -f "$tmp_tindex.shp" ]]
 then
@@ -207,7 +224,6 @@ then
 	echo "</Document>" >> $tmpkml
 	echo "</kml>" >> $tmpkml
 
-	
 	mv -f "$tmpkml" "$kml"
 
 fi
