@@ -26,19 +26,14 @@
 #include "error.h"
 
 /*******************************************************************************
-                        MSB               HALFWORD                 LSB
-                                          PACKET CODE (=18)
-                                                SPARE
-                                                SPARE
-                                   NUMBER OF LFM BOXES IN ROW
-                                          NUMBER OF ROWS
-REPEAT FOR                            NUMBER OF BYTES IN ROW
-EACH ROW                  RUN (0)      LEVEL (0)      RUN (1)       LEVEL (1)
-                          RUN (2)      LEVEL (2)      RUN (3)       LEVEL (3)
-                                                 •••
-                                                 •••
-                          RUN (N)      LEVEL (N)         0000         0000
-    Figure 3-11b. Precipitation Rate Data Array Packet - Packet Code 18 (Sheet 1)
+Individual Rows
+
+Each row contains Run Length Encoded (RLE) values.
+01 	Number of Bytes in Row 	RLE data always padded to even halfword boundary
+02 	Run0 	Code0 	Run is 8 bit value for number of bins for this value
+03 	Run1 	Code1 	Code is 8 bit value (0-255) for the value within the run
+04-## 	Run Codes 	Repeated for entire row
+## 	RunN 	CodeN 	  
 *******************************************************************************/
 
 /*******************************************************************************
@@ -52,31 +47,42 @@ returns:
 							pointer to the next byte in the buffer
 *******************************************************************************/
 
-char *parse_precip_row(char *buf, NIDS_precip_row *r) {
+char *parse_d_precip_row(char *buf, NIDS_d_precip_row *r) {
 	char *p;
 	int i;
 	
 	r->num_rle = GET2(buf);
-		
+	
 	if (!(r->run = malloc(r->num_rle)))
-		ERROR("parse_precip_row");
+		ERROR("parse_d_precip_row");
 	
 	if (!(r->code = malloc(r->num_rle)))
-		ERROR("parse_precip_row");
+		ERROR("parse_d_precip_row");
 	
 	p = buf + 2;
 	
-	for (i = 0 ; i < r->num_rle ; i++) {
-		r->run[i] = (p[i] >> 4) & 0x0f;
-		r->code[i] = p[i] & 0x0f;
+	for (i = 0 ; i < r->num_rle ; i++, p += 2) {
+		r->run[i] = *p;
+		r->code[i] = *(p + 1);
 	}
 	
-	return p + i;
-}
-
+	if (!(i%2))
+		p += 2;
+	
+	return p;
+}	
 
 /*******************************************************************************
-	function to parse a precip packet
+3.5. Digital Precipitation Array Packet
+01 	Packet Code = 17 	Hex "11"
+02 	Op Flags 	Reserved
+03 	Op Flags 	Reserved
+04 	Number of LFM Boxes in Row 	 
+05 	Number of Rows 	 
+*******************************************************************************/
+
+/*******************************************************************************
+	function to parse a digital precip packet
 	
 args:					buf			the buffer pointing to the start of the precip packet
 							r				the structure to store the precip in
@@ -85,7 +91,7 @@ returns:
 							pointer to the next byte in the buffer
 *******************************************************************************/
 
-char *parse_precip_header(char *buf, NIDS_precip *r) {
+char *parse_d_precip_header(char *buf, NIDS_d_precip *r) {
 	int i;
 	char *p;
 	
@@ -94,20 +100,20 @@ char *parse_precip_header(char *buf, NIDS_precip *r) {
 	r->lfm_per_row = GET2(buf + 4);
 	r->num_rows = GET2(buf + 6);
 	
-	if (!(r->rows = malloc(r->num_rows * sizeof(NIDS_precip))))
-		ERROR("parse_precip_header");
+	if (!(r->rows = malloc(r->num_rows * sizeof(NIDS_d_precip))))
+		ERROR("parse_d_precip_header");
 	
 	p = buf + 8;
 	
 	for (i = 0 ; i < r->num_rows ; i++) {
-		p = parse_precip_row(p, r->rows + i);
+		p = parse_d_precip_row(p, r->rows + i);
 	}
 	
 	return p;
 }
 
 /*******************************************************************************
-	function to free a precip row
+	function to free a digital precip row
 
 args:
 						r			the precip row to free
@@ -116,7 +122,7 @@ returns:
 						nothing
 *******************************************************************************/
 
-void free_precip_row(NIDS_precip_row *r) {
+void free_d_precip_row(NIDS_d_precip_row *r) {
 	free(r->run);
 	free(r->code);
 }
@@ -131,11 +137,11 @@ returns:
 						nothing
 *******************************************************************************/
 
-void free_precip_header(NIDS_precip *r) {
+void free_d_precip_header(NIDS_d_precip *r) {
 	int i;
 	
 	for (i = 0 ; i < r->num_rows ; i++)
-		free_precip_row(r->rows + i);
+		free_d_precip_row(r->rows + i);
 	
 	free(r->rows);
 	
@@ -153,9 +159,9 @@ returns:
 						nothing
 *******************************************************************************/
 
-void print_precip_row(NIDS_precip_row *r, char *prefix, int rn) {
+void print_d_precip_row(NIDS_d_precip_row *r, char *prefix, int rn) {
 	
-	printf("%s.precip.rows[%i].num_rle %i\n", prefix, rn, r->num_rle);
+	printf("%s.d_precip.rows[%i].num_rle %i\n", prefix, rn, r->num_rle);
 	
 }
 	
@@ -170,15 +176,15 @@ returns:
 						nothing
 *******************************************************************************/
 
-void print_precip_header(NIDS_precip *r, char *prefix) {
+void print_d_precip_header(NIDS_d_precip *r, char *prefix) {
 	int i;
 	
-	printf("%s.precip.op_flags1 %i\n", prefix, r->op_flags1);
-	printf("%s.precip.op_flags2 %i\n", prefix, r->op_flags2);
-	printf("%s.precip.lfm_per_row %i\n", prefix, r->lfm_per_row);
-	printf("%s.precip.num_rows %i\n", prefix, r->num_rows);
+	printf("%s.d_precip.op_flags1 %i\n", prefix, r->op_flags1);
+	printf("%s.d_precip.op_flags2 %i\n", prefix, r->op_flags2);
+	printf("%s.d_precip.lfm_per_row %i\n", prefix, r->lfm_per_row);
+	printf("%s.d_precip.num_rows %i\n", prefix, r->num_rows);
 	
 	for (i = 0 ; i < r->num_rows ; i++)
-		print_precip_row(r->rows + i, prefix, i);
+		print_d_precip_row(r->rows + i, prefix, i);
 	
 }

@@ -46,12 +46,13 @@ void free_prod_desc(NIDS_prod_desc *d);
 
 args:
 						d				the structure the product desc is stored in
+						prefix	the start of the line
 
 returns:
 						nothing
 *******************************************************************************/
 
-void print_prod_desc(NIDS_prod_desc *d);
+void print_prod_desc(NIDS_prod_desc *d, char *prefix);
 
 #endif /* _PROD_DESC_H */
 

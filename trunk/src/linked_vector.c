@@ -23,11 +23,9 @@
 
 #include "../include/NIDS.h"
 #include "get.h"
+#include "image.h"
 #include "linked_vector.h"
 #include "error.h"
-
-#define RASTER_X_SIZE 4096
-#define RASTER_Y_SIZE 4096
 
 /*******************************************************************************
                     MSB       HALFWORD         LSB
@@ -156,4 +154,35 @@ void print_linked_vector_header(NIDS_linked_vectors *v, char *prefix) {
 	
 	for (i = 0 ; i < v->num_vectors ; i++)
 		print_linked_vector(v->vectors + i, prefix, i);
+}
+
+/*******************************************************************************
+	fuction to draw a vector in an image
+
+args:
+						raster	pointer to the raster
+						v				the structure that holds the vectors
+						xcenter	the x axis center in the raster
+						ycenter	the y axis center in the raster
+
+returns:
+						nothing
+*******************************************************************************/
+
+
+void linked_vectors_to_raster (
+	NIDS_image *im,
+	NIDS_linked_vectors *v)
+{
+	int i;
+	
+	for (i = 0 ; i < v->num_vectors ; i++) {
+		draw_line(im,
+							v->vectors[i].x_start,
+							v->vectors[i].x_end,
+							v->vectors[i].y_start,
+							v->vectors[i].y_end,
+							1);
+	}
+	
 }

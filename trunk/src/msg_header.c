@@ -80,19 +80,20 @@ void free_msg_header(NIDS_msg_header *h) {
 
 args:
 						h				the structure the msg header is stored in
+						prefix	the start of the line
 
 returns:
 						nothing
 *******************************************************************************/
 
-void print_msg_header(NIDS_msg_header *h) {
+void print_msg_header(NIDS_msg_header *h, char *prefix) {
 	
-	printf("data.msg.code %i\n", h->code);
-	printf("data.msg.time %lu\n", h->time);
-	printf("data.msg.len %u\n", h->len);
-	printf("data.msg.s_id %i\n", h->s_id);
-	printf("data.msg.d_id %i\n", h->d_id);
-	printf("data.msg.num_blocks %i\n", h->num_blocks);
+	printf("%s.msg.code %i\n", prefix, h->code);
+	printf("%s.msg.time %lu\n", prefix, h->time);
+	printf("%s.msg.len %u\n", prefix, h->len);
+	printf("%s.msg.s_id %i\n", prefix, h->s_id);
+	printf("%s.msg.d_id %i\n", prefix, h->d_id);
+	printf("%s.msg.num_blocks %i\n", prefix, h->num_blocks);
 	
 }
 

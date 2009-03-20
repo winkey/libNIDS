@@ -70,10 +70,9 @@ returns:
 
 *******************************************************************************/
 
-char *radials_to_raster (
-	NIDS_radials *r,
-	int *width,
-	int *height);
+void radials_to_raster(
+	NIDS_image *im,
+	NIDS_radials *r);
 
 #endif /* _RADIAL_H */
 

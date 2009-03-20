@@ -23,11 +23,13 @@
 #include "../include/NIDS.h"
 
 #include "get.h"
+#include "image.h"
 #include "../include/NIDS.h"
 #include "circle.h"
 #include "error.h"
 
-
+#define RASTER_X_SIZE 4096
+#define RASTER_Y_SIZE 4096
 
 /*******************************************************************************
 	function to parse a single circle
@@ -133,3 +135,34 @@ void print_circle_header(NIDS_circles *c, char *prefix) {
 		print_circle(c->circles + i, prefix, i);
 	
 }
+
+/*******************************************************************************
+	fuction to draw a circle in an image
+
+args:
+						raster	pointer to the raster
+						v				the structure that holds the circles
+						xcenter	the x axis center in the raster
+						ycenter	the y axis center in the raster
+
+returns:
+						nothing
+*******************************************************************************/
+
+void circles_to_raster (
+	NIDS_image *im,
+	NIDS_circles *c)
+{
+	int i;
+	
+	for (i = 0 ; i < c->num_circles ; i++) {
+		draw_circle(im,
+								c->circles[i].x_start,
+								c->circles[i].y_start,
+								c->circles[i].radius,
+								1);
+	}
+	
+}
+
+

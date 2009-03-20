@@ -23,11 +23,10 @@
 
 #include "../include/NIDS.h"
 #include "get.h"
-#include "radial.h"
-#include "error.h"
 
-#define RASTER_X_SIZE 4096
-#define RASTER_Y_SIZE 4096
+#include "error.h"
+#include "image.h"
+#include "radial.h"
 
 /*******************************************************************************
 Individual Radials
@@ -208,6 +207,7 @@ void print_radial_header(NIDS_radials *r, char *prefix) {
 	printf("%s.rad.num_bins %i\n", prefix, r->num_bins);
 	printf("%s.rad.x_center %i\n", prefix, r->x_center);
 	printf("%s.rad.y_center %i\n", prefix, r->y_center);
+	printf("%s.rad.scale %i\n", prefix, r->scale);
 	printf("%s.rad.num_radials %i\n", prefix, r->num_radials);
 	
 	for (i = 0 ; i < r->num_radials ; i++)
@@ -228,7 +228,7 @@ void radial_convert(float angle, float delta, int bin, int *x, int *y) {
 	function to convert a single radial to a raster
 *******************************************************************************/
 
-void radial_to_raster (NIDS_radial *r, char *raster, int x_center, int y_center) {
+void radial_to_raster (NIDS_radial *r, NIDS_image *im) {
 	int x, y;
 	int i, j;
 	float k, angle;
@@ -245,14 +245,7 @@ void radial_to_raster (NIDS_radial *r, char *raster, int x_center, int y_center)
 			
 				radial_convert(angle , r->delta, bin, &x, &y);
 				
-				if (x_center + x >= RASTER_X_SIZE || x_center + x < 0)
-					fprintf(stderr, "WARNING: raster x value %i out of range, skipping\n", x + x_center);
-				else if (y_center + -y >= RASTER_Y_SIZE || y_center + -y < 0)
-					fprintf(stderr, "WARNING: raster y value %i out of range, skipping\n", y + y_center);
-				
-				else {
-					raster[(-x + x_center) + (RASTER_X_SIZE * (y + y_center))] = r->code[i];
-				}
+				plot(im, y, -x, r->code[i]);
 			}
 		}
 	}
@@ -272,25 +265,18 @@ returns:
 
 *******************************************************************************/
 
-char *radials_to_raster (
-	NIDS_radials *r,
-	int *width,
-	int *height)
+void radials_to_raster (
+	NIDS_image *im,
+	NIDS_radials *r)
 {
 	int i;
-	char *raster = NULL;
-	
-	if (!(raster = calloc(RASTER_X_SIZE, RASTER_Y_SIZE)))
-		ERROR("radials_to_raster");
+
+	im->x_center = 256;
+	im->x_center = 280;
+	//r->x_center,
+	//r->y_center);
 	
 	for (i = 0 ; i < r->num_radials ; i++)
-		radial_to_raster(r->radials + i,
-										 raster,
-										 r->x_center + RASTER_X_SIZE / 2,
-										 r->y_center + RASTER_Y_SIZE / 2);
+		radial_to_raster(r->radials + i, im);
 	
-	*width = RASTER_X_SIZE;
-	*height = RASTER_Y_SIZE;
-	
-	return raster;
 }

@@ -22,8 +22,11 @@
 
 #include "get.h"
 #include "../include/NIDS.h"
+#include "image.h"
 #include "v_vector.h"
 #include "error.h"
+
+
 
 /*******************************************************************************
 3.7. Valued Unlinked Vector Packet
@@ -54,15 +57,15 @@ returns:
 							pointer to the next byte in the buffer
 *******************************************************************************/
 
-char *parse_v_vector(char *buf, NIDS_v_vector *v) {
+char *parse_v_vector(char *buf, NIDS_v_vector *v, int value) {
 	
-	v->value = GET2(buf);
-	v->x_start = GET2(buf + 2);
-	v->y_start = GET2(buf + 4);
-	v->x_end = GET2(buf + 6);
-	v->y_end = GET2(buf + 8);
+	v->value = value;
+	v->x_start = GET2(buf);
+	v->y_start = GET2(buf + 2);
+	v->x_end = GET2(buf + 4);
+	v->y_end = GET2(buf + 6);
 
-	return buf + 10;
+	return buf + 8;
 }
 
 /*******************************************************************************
@@ -78,16 +81,20 @@ returns:
 char *parse_v_vector_header(char *buf, NIDS_v_vectors *v) {
 	int i;
 	char *p;
+	int value;
 	
 	v->length = GET2(buf);
-	v->num_vectors = v->length / 8;
+	
+	value = GET2(buf + 2);
+	
+	v->num_vectors = (v->length - 2) / 8;
 	if (!(v->vectors = malloc(v->num_vectors * sizeof(NIDS_v_vector))))
 		ERROR("parse_v_vector_header");
 	
-	p = buf + 2;
+	p = buf + 4;
 	
 	for (i = 0 ; i < v->num_vectors ; i++) {
-		p = parse_v_vector(p, v->vectors + i);
+		p = parse_v_vector(p, v->vectors + i, value);
 	}
 	
 	return p;
@@ -152,3 +159,35 @@ void print_v_vector_header(NIDS_v_vectors *v, char *prefix) {
 		print_v_vector(v->vectors + i, prefix, i);
 
 }
+
+/*******************************************************************************
+	fuction to draw a vector in an image
+
+args:
+						raster	pointer to the raster
+						v				the structure that holds the vectors
+						xcenter	the x axis center in the raster
+						ycenter	the y axis center in the raster
+
+returns:
+						nothing
+*******************************************************************************/
+
+void v_vectors_to_raster (
+	NIDS_image *im,
+	NIDS_v_vectors *v)
+{
+	int i;
+	
+	for (i = 0 ; i < v->num_vectors ; i++) {
+		draw_line(im,
+							v->vectors[i].x_start,
+							v->vectors[i].x_end,
+							v->vectors[i].y_start,
+							v->vectors[i].y_end,
+							v->vectors[i].value);
+	}
+	
+}
+
+

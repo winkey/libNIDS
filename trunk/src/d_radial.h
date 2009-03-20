@@ -55,23 +55,7 @@ returns:
 
 void print_d_radial_header(NIDS_d_radials *r, char *prefix);
 
-/*******************************************************************************
-	function to convert a Digital Radial Data Array to a raster
 
-args:
-						r				the structure that holds the radials
-						width		pointer to return the width of the raster in
-						height	pointer to return the height of the raster in
-
-returns:
-						a char pointer to the raster data
-
-*******************************************************************************/
-
-char *d_radials_to_raster (
-	NIDS_d_radials *r,
-	int *width,
-	int *height);
 
 #endif /* _D_RADIAL_H */
 

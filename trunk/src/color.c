@@ -179,19 +179,6 @@ NIDS_color four_bit_precip[] = {
 	{{0xFF, 0xFF, 0xFF, 0xFF}}
 };
 
-NIDS_color eight_bit_reflectivity[] = {
-	{{0x00, 0x00, 0x00, 0x00}}
-};
-NIDS_color eight_bit_velocity[] = {
-	{{0x00, 0x00, 0x00, 0x00}}
-};
-NIDS_color eight_bit_precip[] = {
-	{{0x00, 0x00, 0x00, 0x00}}
-};
-NIDS_color eight_bit_echo_tops[] = {
-	{{0x00, 0x00, 0x00, 0x00}}
-};
-
 
 void get_product_dependent_color(int msgcode, NIDS_color **result) {
 	
@@ -253,16 +240,6 @@ void get_product_dependent_color(int msgcode, NIDS_color **result) {
 			*result = three_bit_spectrum;
 			break;
 		
-		case 32:
-		case 94:
-			*result = eight_bit_reflectivity;
-			break;
-
-		case 93:
-		case 99:
-			*result = eight_bit_velocity;
-			break;
-		
 		case 41:
 			*result = four_bit_echo_tops;
 			break;
@@ -285,13 +262,17 @@ void get_product_dependent_color(int msgcode, NIDS_color **result) {
 			*result = four_bit_precip;
 			break;
 
-		case 81:
-		case 138:
-			*result = eight_bit_precip;
+		case 47:
+			*result = two_bit_severe_weather_probability;
+			break;
+		
+		case 48:
+			*result = three_bit_vad;
 			break;
 
-		case 135:
-			*result = eight_bit_echo_tops;
+		case 59:
+		case 141:
+			*result = three_bit_reflectivity;
 			break;
 		
 /*

@@ -22,6 +22,7 @@
 
 #include "../include/NIDS.h"
 #include "get.h"
+#include "image.h"
 #include "storm_id.h"
 #include "error.h"
 
@@ -57,6 +58,7 @@ char *parse_storm_id(char *buf, NIDS_storm_id *s) {
 	s->id[1] = p[1];
 	s->id[2] = 0;
 	
+	
 	return p + 2;
 }	
 
@@ -77,7 +79,7 @@ char *parse_storm_id_header(char *buf, NIDS_storm_ids *s) {
 	int i;
 	
 	s->length = GET2(buf);
-	s->num_ids = s->length / 2;
+	s->num_ids = s->length / 6;
 	
 
 	
@@ -86,7 +88,7 @@ char *parse_storm_id_header(char *buf, NIDS_storm_ids *s) {
 	
 	p = buf + 2;
 	
-	for (i = 0 ; i < s->num_ids - 4 ; i++) {
+	for (i = 0 ; i < s->num_ids ; i++) {
 		p = parse_storm_id(p, s->ids + i);
 	}
 	
@@ -147,5 +149,40 @@ void print_storm_id_header(NIDS_storm_ids *s, char *prefix) {
 	
 	for (i = 0; i < s->num_ids; i++)
 		print_storm_id(s->ids + i, prefix, i);
+	
+}
+/*******************************************************************************
+*******************************************************************************/
+
+void storm_id_to_raster(
+	NIDS_image *im,
+	NIDS_storm_id *s)
+{
+
+	draw_string(im, s->x_pos, s->y_pos, s->id, 1);
+	
+}
+
+/*******************************************************************************
+	fuction to draw a storm id in an image
+
+args:
+						t				the structure that holds the storm id
+						width		pointer to return the width of the raster in
+						height	pointer to return the height of the raster in
+
+returns:
+						a char pointer to the raster data
+*******************************************************************************/
+
+void storm_ids_to_raster (
+	NIDS_image *im,
+	NIDS_storm_ids *s)
+{
+	int i;
+	
+	for (i = 0; i < s->num_ids; i++) {
+		storm_id_to_raster(im, s->ids + i);
+	}
 	
 }

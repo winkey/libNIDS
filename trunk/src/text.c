@@ -22,6 +22,7 @@
 
 #include "../include/NIDS.h"
 #include "get.h"
+#include "image.h"
 #include "text.h"
 #include "error.h"
 
@@ -57,9 +58,9 @@ char *parse_text_header(char *buf, NIDS_text *t) {
 	t->length = GET2(buf);
 	t->num_chars = t->length - 4;
 	t->x_start = GET2(buf + 2);
-	t->x_start = GET2(buf + 4);
+	t->y_start = GET2(buf + 4);
 	
-	if (!(t->chars = malloc(t->num_chars)))
+	if (!(t->chars = malloc(t->num_chars + 1)))
 		ERROR("parse_text_header");
 	
 	p = buf + 6;
@@ -109,5 +110,27 @@ void print_text_header(NIDS_text *t, char *prefix) {
 	printf("%s.text.x_start %i\n", prefix, t->x_start);
 	printf("%s.text.y_start %i\n", prefix, t->y_start);
 	printf("%s.text.chars %s\n", prefix, t->chars);
+	
+}
+
+/*******************************************************************************
+	fuction to draw a text in an image
+
+args:
+						raster	pointer to the raster
+						t				the structure that holds the text
+						xcenter	the x axis center in the raster
+						ycenter	the y axis center in the raster
+
+returns:
+						nothing
+*******************************************************************************/
+
+void texts_to_raster (
+	NIDS_image *im,
+	NIDS_text *t)
+{
+	
+	draw_string(im, t->x_start, t->y_start, t->chars, 1);
 	
 }

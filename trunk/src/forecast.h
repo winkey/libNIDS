@@ -54,6 +54,23 @@ returns:
 
 void print_forecast_header(NIDS_forecasts *f, char *prefix);
 
+/*******************************************************************************
+	fuction to draw forcasts in an image
+
+args:
+						raster	pointer to the raster
+						f				the structure that holds the forcasts
+						xcenter	the x axis center in the raster
+						ycenter	the y axis center in the raster
+
+returns:
+						nothing
+*******************************************************************************/
+
+void forecasts_to_raster (
+	NIDS_image *im,
+	NIDS_forecasts *f);
+
 #endif /* _FORECAST_H */
 
  

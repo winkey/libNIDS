@@ -18,7 +18,7 @@
 #define _ERROR_H
 
 #define ERROR(x) {\
-  fprintf(stderr, "ERROR:file %s:line %d:function %s:%s\n",\
+  fprintf(stderr, "ERROR:\n      file: %s\n      line: %d\n      function:  %s\n      %s\n",\
 	        __FILE__, __LINE__, (x), strerror(errno));\
 	exit(EXIT_FAILURE);\
 }

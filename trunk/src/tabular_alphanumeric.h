@@ -17,13 +17,54 @@
 #ifndef _TABULAR_ALPHANUMERIC_H
 #define _TABULAR_ALPHANUMERIC_H
 
-#include <glib.h>
+/*******************************************************************************
+	function to parse the tabular alphanumeric block
 
-G_BEGIN_DECLS
+args:					buf			the buffer pointing to the start of the block
+							t				the structure to store the block in
 
+returns:
+							pointer to the next byte in the buffer
+*******************************************************************************/
 
+char *parse_tabular_alphanumeric(char *buf, NIDS_tabular_alphanumeric *t);
 
-G_END_DECLS
+/*******************************************************************************
+	function to check if a block is a tabular alphanumeric block
+	
+args:
+					buf 				the buffer pointing to the start of the block
+
+returns:
+					1 	if the block is a graphic_alphanumeric block
+					0		if it is not
+*******************************************************************************/
+
+int is_tabular_alphanumeric(char *buf);
+
+/*******************************************************************************
+	function to free the tabular alphanumeric block
+
+							t				pointer to the block
+
+returns:
+							nothing
+*******************************************************************************/
+
+void free_tabular_alphanumeric(NIDS_tabular_alphanumeric *t);
+
+/*******************************************************************************
+	function to print the tabular_alphanumeric block
+
+args:
+						t				the structure the block is stored in
+						prefix	the start of the line
+
+returns:
+						nothing
+*******************************************************************************/
+
+void print_tabular_alphanumeric(NIDS_tabular_alphanumeric *t, char *prefix);
 
 #endif /* _TABULAR_ALPHANUMERIC_H */
 

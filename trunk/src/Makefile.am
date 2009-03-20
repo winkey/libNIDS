@@ -61,7 +61,17 @@ libNIDS_la_SOURCES = \
 	v_linked_vector.c       \
 	v_linked_vector.h       \
 	v_text.h       \
-	v_text.c
+	v_text.c       \
+	d_precip.c       \
+	d_precip.h       \
+	point.c       \
+	point.h       \
+	point_feature.c       \
+	point_feature.h       \
+	hail.h       \
+	hail.c       \
+	image.c       \
+	image.h       
 
 libNIDS_la_LDFLAGS = \
 	-lm           \

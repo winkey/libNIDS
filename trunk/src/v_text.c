@@ -23,6 +23,7 @@
 
 #include "../include/NIDS.h"
 #include "get.h"
+#include "image.h"
 #include "v_text.h"
 #include "error.h"
 
@@ -64,12 +65,12 @@ char *parse_v_text_header(char *buf, NIDS_v_text *t) {
 	t->num_chars = t->length - 6;
 	t->value = GET2(buf + 2);
 	t->x_start = GET2(buf + 4);
-	t->x_start = GET2(buf + 6);
+	t->y_start = GET2(buf + 6);
 	
-	if (!(t->chars = malloc(t->num_chars)))
+	if (!(t->chars = malloc(t->num_chars + 1)))
 		ERROR("parse_v_text_header");
 	
-	p = buf + 6;
+	p = buf + 8;
 	
 	for (i = 0 ; i < t->num_chars ; i++, p++) {
 		t->chars[i] = *p;
@@ -78,7 +79,7 @@ char *parse_v_text_header(char *buf, NIDS_v_text *t) {
 	
 	if (i % 2)
 		p++;
-	
+
 	return p;
 }
 	
@@ -117,5 +118,27 @@ void print_v_text_header(NIDS_v_text *t, char *prefix) {
 	printf("%s.v_text.x_start %i\n", prefix, t->x_start);
 	printf("%s.v_text.y_start %i\n", prefix, t->y_start);
 	printf("%s.v_text.chars %s\n", prefix, t->chars);
+	
+}
+
+/*******************************************************************************
+	fuction to draw a v_text in an image
+
+args:
+						raster	pointer to the raster
+						t				the structure that holds the text
+						xcenter	the x axis center in the raster
+						ycenter	the y axis center in the raster
+
+returns:
+						nothing
+*******************************************************************************/
+
+void v_texts_to_raster (
+	NIDS_image *im,
+	NIDS_v_text *t)
+{
+	
+	draw_string(im, t->x_start, t->y_start, t->chars, t->value);
 	
 }

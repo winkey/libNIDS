@@ -77,8 +77,8 @@ typedef struct {
 typedef struct {
 	int index_first_bin;
 	int num_bins;
-	int x_center;
-	int y_center;
+	signed short x_center;
+	signed short y_center;
 	int scale;
 	int num_radials;
 	NIDS_radial *radials;
@@ -90,6 +90,7 @@ typedef struct {
 
 typedef struct {
 	int num_bytes;
+	int num_bins;
 	float start;
 	float delta;
 	char *level;
@@ -98,8 +99,8 @@ typedef struct {
 typedef struct {
 	int index_first_bin;
 	int num_bins;
-	int x_center;
-	int y_center;
+	signed short x_center;
+	signed short y_center;
 	int scale;
 	int num_radials;
 	NIDS_d_radial *radials;
@@ -118,8 +119,8 @@ typedef struct {
 typedef struct {
 	int op_flags1;
 	int op_flags2;
-	int x_start;
-	int y_start;
+	signed short x_start;
+	signed short y_start;
 	int x_scale_int;
 	int x_scale_fract;
 	int y_scale_int;
@@ -135,8 +136,8 @@ typedef struct {
 
 typedef struct {
 	int value;
-	int x_start;
-	int y_start;
+	signed short x_start;
+	signed short y_start;
 	int heading;
 	int speed;
 } NIDS_barb;
@@ -148,12 +149,30 @@ typedef struct {
 } NIDS_barbs;
 
 /*******************************************************************************
+	hail
+*******************************************************************************/
+
+typedef struct {
+	signed short x_start;
+	signed short y_start;
+	int prob;
+	int severe;
+	int max_size;
+} NIDS_hail;
+
+typedef struct {
+	size_t length;
+	int num_hails;
+	NIDS_hail *hails;
+} NIDS_hails;
+
+/*******************************************************************************
 	vector arrows
 *******************************************************************************/
 
 typedef struct {
-	int x_start;
-	int y_start;
+	signed short x_start;
+	signed short y_start;
 	int heading;
 	int length;
 	int head_length;
@@ -166,14 +185,46 @@ typedef struct {
 } NIDS_arrows;
 
 /*******************************************************************************
+	point features
+*******************************************************************************/
+
+typedef struct {
+	signed short x_start;
+	signed short y_start;
+	int type;
+	int attr;
+} NIDS_point_feature;
+
+typedef struct {
+	size_t length;
+	int num_points;
+	NIDS_point_feature *points;
+} NIDS_point_features;
+
+/*******************************************************************************
+	point
+*******************************************************************************/
+
+typedef struct {
+	signed short x_start;
+	signed short y_start;
+} NIDS_point;
+
+typedef struct {
+	size_t length;
+	int num_points;
+	NIDS_point *points;
+} NIDS_points;
+
+/*******************************************************************************
 	Unlinked Vector
 *******************************************************************************/
 
 typedef struct {
-	int x_start;
-	int y_start;
-	int x_end;
-	int y_end;
+	signed short x_start;
+	signed short y_start;
+	signed short x_end;
+	signed short y_end;
 } NIDS_vector;
 
 typedef struct {
@@ -188,10 +239,10 @@ typedef struct {
 
 typedef struct {
 	int value;
-	int x_start;
-	int y_start;
-	int x_end;
-	int y_end;
+	signed short x_start;
+	signed short y_start;
+	signed short x_end;
+	signed short y_end;
 } NIDS_v_vector;
 
 typedef struct {
@@ -205,8 +256,8 @@ typedef struct {
 *******************************************************************************/
 
 typedef struct {
-	int x_start;
-	int y_start;
+	signed short x_start;
+	signed short y_start;
 	int radius;
 } NIDS_circle;
 
@@ -217,7 +268,7 @@ typedef struct {
 } NIDS_circles;
 
 /*******************************************************************************
-	Digital Precipitation Array
+	Precipitation Array
 *******************************************************************************/
 
 typedef struct {
@@ -235,14 +286,32 @@ typedef struct {
 } NIDS_precip;
 
 /*******************************************************************************
+	Digital Precipitation Array
+*******************************************************************************/
+
+typedef struct {
+	short num_rle;
+	char *run;
+	char *code;
+} NIDS_d_precip_row;
+
+typedef struct {
+	int op_flags1;
+	int op_flags2;
+	int lfm_per_row;
+	int num_rows;
+	NIDS_d_precip_row *rows;
+} NIDS_d_precip;
+
+/*******************************************************************************
 	text packet
 *******************************************************************************/
 
 typedef struct {
 	size_t length;
 	int num_chars;
-	int x_start;
-	int y_start;
+	signed short x_start;
+	signed short y_start;
 	char *chars;
 } NIDS_text;
 
@@ -254,8 +323,8 @@ typedef struct {
 	size_t length;
 	int num_chars;
 	int value;
-	int x_start;
-	int y_start;
+	signed short x_start;
+	signed short y_start;
 	char *chars;
 } NIDS_v_text;
 
@@ -264,8 +333,8 @@ typedef struct {
 *******************************************************************************/
 
 typedef struct {
-	int x_pos;
-	int y_pos;
+	signed short x_pos;
+	signed short y_pos;
 	char id[3];
 } NIDS_storm_id;
 
@@ -322,12 +391,20 @@ typedef struct {
 #define V_LINKED_VECTOR		0x0009
 #define V_VECTOR					0x000A
 #define CIRCLE2						0x000B
+#define POINT1						0x000C
+#define POINT2						0x000D
+#define POINT3						0x000E
+#define STORM_ID					0x000F
 #define D_RADIAL					0x0010
-#define PRECIP						0x0011
-#define STORM_ID					0x0013
+#define D_PRECIP					0x0011
+#define PRECIP						0x0012
+#define HAIL							0x0013
+#define POINT_FEATURE			0x0014
+
 #define FORECAST1					0x0017
 #define FORECAST2					0x0018
 #define CIRCLE3						0x0019
+#define POINT4						0x001A
 
 #define RADIAL						0xAF1F
 #define RASTER1						0xBA0F
@@ -341,15 +418,19 @@ typedef struct {
 *******************************************************************************/
 
 #define PREFIX_LEN 100
+
 typedef struct {
-	size_t length;
 	int data_type;
 	union {
 		NIDS_radials rad;
 		NIDS_d_radials d_radial;
 		NIDS_raster rast;
 		NIDS_arrows arrow;
+		NIDS_point_features point_feature;
+		NIDS_points point;
 		NIDS_barbs barb;
+		NIDS_hails hail;
+		NIDS_d_precip d_precip;
 		NIDS_precip precip;
 		NIDS_vectors vector;
 		NIDS_v_vectors v_vector;
@@ -361,6 +442,12 @@ typedef struct {
 		NIDS_v_linked_vectors v_linked_vector;
 		NIDS_forecasts forecast;
 	};
+} NIDS_symbology_packet;
+	
+typedef struct {
+	size_t length;
+	int num_packets;
+	NIDS_symbology_packet *packets;
 } NIDS_symbology_layer;
 
 
@@ -375,6 +462,55 @@ typedef struct {
 	NIDS_symbology_layer *layers;
 } NIDS_product_symbology;
 
+/*******************************************************************************
+	graphic alphanumeric block
+*******************************************************************************/
+
+typedef struct {
+	int data_type;
+	union {
+		NIDS_v_vectors v_vector;
+		NIDS_v_text v_text;
+	};
+} NIDS_graphic_alphanumeric_text;
+
+typedef struct {
+	int page;
+	size_t length;
+	int num_texts;
+	NIDS_graphic_alphanumeric_text *texts;
+} NIDS_graphic_alphanumeric_page;
+
+typedef struct {
+	int id;
+	size_t length;
+	int num_pages;
+	NIDS_graphic_alphanumeric_page *pages;
+} NIDS_graphic_alphanumeric;
+
+
+/*******************************************************************************
+	tabular alphanumeric block
+*******************************************************************************/
+
+typedef struct {
+	size_t line_len;
+	char line[81];
+} NIDS_tabular_alphanumeric_line;
+
+typedef struct {
+	int num_lines;
+	NIDS_tabular_alphanumeric_line *lines;
+} NIDS_tabular_alphanumeric_page;
+
+typedef struct {
+	int id;
+	size_t length;
+	NIDS_msg_header msg;
+	NIDS_prod_desc prod;
+	int num_pages;
+	NIDS_tabular_alphanumeric_page *pages;
+} NIDS_tabular_alphanumeric;
 
 /*******************************************************************************
 	master struct to holdwhole the whole thing
@@ -385,6 +521,8 @@ typedef struct {
 	NIDS_prod_desc prod;
 	prod_dep_desc pdd;
 	NIDS_product_symbology symb;
+	NIDS_graphic_alphanumeric graphic;
+	NIDS_tabular_alphanumeric tab;
 } NIDS;
 
 FILE *NIDS_open(char *filename);
@@ -400,7 +538,6 @@ void NIDS_print(NIDS *data);
 
 char *NIDS_to_raster(
 	NIDS *data,
-	int layer,
 	int *width,
 	int *height);
 

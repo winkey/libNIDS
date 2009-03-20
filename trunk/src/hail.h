@@ -14,63 +14,60 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor Boston, MA 02110-1301,  USA
  */
  
-#ifndef _V_TEXT_H
-#define _V_TEXT_H
+#ifndef _HAIL_H
+#define _HAIL_H
 
 /*******************************************************************************
-	function to parse a valued text packet
+	function to parse a hail packet
 	
-args:					buf			the buffer pointing to the start of the text packet
-							t				the structure to store the text in
+args:					buf			the buffer pointing to the start of the hail packet
+							b				the structure to store the hails in
 
 returns:
 							pointer to the next byte in the buffer
 *******************************************************************************/
 
-char *parse_v_text_header(char *buf, NIDS_v_text *t);
+char *parse_hail_header(char *buf, NIDS_hails *h);
 
 /*******************************************************************************
-	function to free any dynamicly alocated memory used in text storage
+	function to free any dynamicly alocated memory used in hail storage
 
 args:
-						t				the structure the text is stored in
+						h				the structure the hails are stored in
 
 returns:
 						nothing
 *******************************************************************************/
 
-void free_v_text_header(NIDS_v_text *t);
+void free_hail_header(NIDS_hails *h);
 
 /*******************************************************************************
-	function to print a valued text packet
+	function to print a hail packet
 
 args:
-						t				the structure the text is stored in
+						h				the structure the hails are stored in
 						prefix	the start of the line
-
 returns:
 						nothing
 *******************************************************************************/
 
-void print_v_text_header(NIDS_v_text *t, char *prefix);
+void print_hail_header(NIDS_hails *h, char *prefix);
 
 /*******************************************************************************
-	fuction to draw a v_text in an image
+	fuction to draw hails in an image
 
 args:
-						raster	pointer to the raster
-						t				the structure that holds the text
-						xcenter	the x axis center in the raster
-						ycenter	the y axis center in the raster
+						im			pointer to the raster struct
+						h				the structure that holds the hails
 
 returns:
 						nothing
 *******************************************************************************/
 
-void v_texts_to_raster (
+void hails_to_raster (
 	NIDS_image *im,
-	NIDS_v_text *t);
+	NIDS_hails *h);
 
-#endif /* _V_TEXT_H */
+#endif /* _HAIL_H */
 
  

@@ -46,12 +46,13 @@ void free_msg_header(NIDS_msg_header *h);
 
 args:
 						h				the structure the msg header is stored in
+						prefix	the start of the line
 
 returns:
 						nothing
 *******************************************************************************/
 
-void print_msg_header(NIDS_msg_header *h);
+void print_msg_header(NIDS_msg_header *h, char *prefix);
 
 #endif /* _MSG_HEADER_H */
 
