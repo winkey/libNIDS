@@ -26,7 +26,6 @@ libNIDS_la_SOURCES = \
 	msg_header.h       \
 	prod_desc.h       \
 	radial.h       \
-	radial2raster.c       \
 	raster.h       \
 	arrow.c       \
 	vector.c       \
@@ -44,8 +43,11 @@ libNIDS_la_SOURCES = \
 	circle.h       \
 	circle.c       \
 	text.h       \
-	compression.c
+	compression.c       \
+	product_dependent_desc.c       \
+	product_dependent_desc.h
 
 libNIDS_la_LDFLAGS = \
-	-lm
+	-lm           \
+	-lbz2
 
