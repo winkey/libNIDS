@@ -128,7 +128,7 @@ int main (int argc, char **argv) {
 	
 	NIDS_color *color;
 	for (i = 0, color = colors ; color->color ; i++, color++) {
-		
+		printf("i = %i\n", i);
 		GDALColorEntry ce;
 		int cv = (int)color->value;
 		float ct = data.prod.thresholds[cv];
