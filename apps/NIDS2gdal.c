@@ -130,8 +130,9 @@ int main (int argc, char **argv) {
 	for (i = 0, color = colors ; color->color ; i++, color++) {
 		
 		GDALColorEntry ce;
-		
-		char *c = color_checkscale(colors, data.prod.thresholds[(int)color->value]);
+		int cv = (int)color->value;
+		float ct = data.prod.thresholds[cv];
+		char *c = color_checkscale(colors, ct);
 		sscanf(c, "%2x%2x%2x", &(ce.c1), &(ce.c2), &(ce.c3));
 		
 		if (color->value)
