@@ -231,7 +231,8 @@ GDALDatasetH gdal_create (
 	char *drivername,
 	char *filename,
 	int xsize,
-	int ysize)
+	int ysize,
+	int bands)
 {
 	char **papszMetadata;
 	GDALDriverH hDriver;
@@ -244,7 +245,7 @@ GDALDatasetH gdal_create (
 	papszMetadata = GDALGetMetadata(hDriver, NULL);
 	
 	//if(!CSLFetchBoolean(papszMetadata, GDAL_DCAP_CREATE, FALSE)) {
-		if (!(hDstDS = GDALCreate(hDriver, filename, xsize, ysize, 4, GDT_Byte, papszOptions)))
+		if (!(hDstDS = GDALCreate(hDriver, filename, xsize, ysize, bands, GDT_Byte, papszOptions)))
 			ERROR("GDALCreate");
 	//.}
 	

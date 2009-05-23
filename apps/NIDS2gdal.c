@@ -49,17 +49,7 @@ int main (int argc, char **argv) {
 	GDALDatasetH out_DS;
 	OGRSpatialReferenceH out_SRS;
 	
-	GDALRasterBandH r_Band;
-	GDALRasterBandH g_Band;
-	GDALRasterBandH b_Band;
-	GDALRasterBandH a_Band;
-	
-	unsigned char *rline = NULL;
-	unsigned char *gline = NULL;
-	unsigned char *bline = NULL;
-	unsigned char *aline = NULL;
-	
-	unsigned int r, g, b, a;
+	GDALRasterBandH hBand;
 	
 	int opt;
 	
@@ -112,90 +102,59 @@ int main (int argc, char **argv) {
 	
 	GDALAllRegister();
 	
-	out_DS = gdal_create(format, outfile, width, height);
+	/***** create the raster *****/
+	
+	out_DS = gdal_create(format, outfile, width, height, 1);
+	
+	/***** get the band *****/
+	
+	hBand = get_band(out_DS, 1);
+	
+	/***** set the projection *****/
 	
 	printf ("xres=%lg yres=%lg\n", data.info->xres, data.info->yres);
 	out_SRS = set_projection(out_DS, &data, width / 2, height / 2, data.info->xres, data.info->yres );
 	
-	r_Band = get_band(out_DS, 1);
-	g_Band = get_band(out_DS, 2);
-	b_Band = get_band(out_DS, 3);
-	a_Band = get_band(out_DS, 4);
+	/***** create the color table *****/
+	
+	GDALColorTableH hColorTable = GDALCreateColorTable(GPI_RGB);
+	
+	/***** fill the color table *****/
 	
 	if (!scalename)
 		get_product_dependent_color(data.msg.code, &colors);
 	else
 		colors = color_getscale(scalename);
-
-	/***** alocate line memmory *****/
 	
-	if (!(rline = malloc(width * sizeof(unsigned char))))
-		ERROR("main");
-	if (!(gline = malloc(width * sizeof(unsigned char))))
-		ERROR("main");
-	if (!(bline = malloc(width * sizeof(unsigned char))))
-		ERROR("main");
-	if (!(aline = malloc(width * sizeof(unsigned char))))
-		ERROR("main");
-	
-
-	
-	
-	for (i = 0; i < height; i++) {
-		for (j = 0; j < width ; j++) {
-						
-			if (!scalename)
-				sscanf(colors[(unsigned char)rast[i * width + j]].color, "%2x%2x%2x",
-							 &r, &g, &b);
-			else
-				sscanf(color_checkscale(colors, data.prod.thresholds[rast[i * width + j]]),
-							 "%2x%2x%2x", &r, &g, &b);
-			
-			if (rast[i * width + j])
-				a = 255;
-			else
-				a = 0;
-			
-			*(rline + j) = r;
-			*(gline + j) = g;
-			*(bline + j) = b;
-			*(aline + j) = a;
-			
-		}
+	NIDS_color *color;
+	for (i = 0, color = colors ; color->color ; i++, color++) {
 		
-		/***** output lines *****/
+		GDALColorEntry ce;
 		
-		GDALRasterIO(r_Band, GF_Write, 0, i,
-								 width, 1,
-								 rline,
-								 width, 1,
-								 GDT_Byte, 0, 0);
-		GDALRasterIO(g_Band, GF_Write, 0, i,
-								 width, 1,
-								 gline,
-								 width, 1,
-								 GDT_Byte, 0, 0);
-		GDALRasterIO(b_Band, GF_Write, 0, i,
-								 width, 1,
-								 bline,
-								 width, 1,
-								 GDT_Byte, 0, 0);
-		GDALRasterIO(a_Band, GF_Write, 0, i,
-								 width, 1,
-								 aline,
-								 width, 1,
-								 GDT_Byte, 0, 0);
+		char *c = color_checkscale(colors, data.prod.thresholds[(int)color->value]);
+		sscanf(c, "%2x%2x%2x", &(ce.c1), &(ce.c2), &(ce.c3));
+		
+		if (color->value)
+				ce.c4 = 255;
+		else
+				ce.c4 = 0;
+			
+		GDALSetColorEntry (hColorTable, i, &ce);
 	}
 	
-	/***** set threshold *****/
-	/*
-	for (i = 0; i < data.pdb.pixels_per_line * data.pdb.num_lines ; i++) {
-		if ((unsigned int) data.ids[i] <= threshhold)
-			data.ids[i] = 0;
-	}
-	*/
+	/***** set the color table *****/
 	
-		
+	GDALSetRasterColorTable(hBand, hColorTable);
+	
+	/***** write the raster *****/
+	
+	GDALRasterIO(hBand, GF_Write, 0, i,
+								 width, height,
+								 rast,
+								 width, height,
+								 GDT_Byte, 0, 0);
+	
+	
 	
 	GDALClose(out_DS);
 	OSRDestroySpatialReference(out_SRS);
@@ -203,10 +162,6 @@ int main (int argc, char **argv) {
 	
 	NIDS_free(&data);
 	NIDS_close(NIDS_fp);
-	free(rline);
-	free(gline);
-	free(bline);
-	free(aline);
 	free(colors);
 	free(rast);
 	
