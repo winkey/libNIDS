@@ -87,7 +87,8 @@ GDALDatasetH gdal_create (
 	char *drivername,
 	char *filename,
 	int xsize,
-	int ysize);
+	int ysize,
+	int bands);
 
 
 
