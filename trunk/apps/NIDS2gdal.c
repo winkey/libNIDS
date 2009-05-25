@@ -91,7 +91,7 @@ int main (int argc, char **argv) {
 	}
 	
 	if (!format)
-		format = "gtiff";
+		format = "HFA";
 	
 	NIDS_fp = NIDS_open(nidsfile);
 	NIDS_read(NIDS_fp, &data);
@@ -126,20 +126,17 @@ int main (int argc, char **argv) {
 	else
 		colors = color_getscale(scalename);
 	
-	NIDS_color *color;
-	for (i = 0, color = colors ; color->color ; i++, color++) {
-		printf("i = %i\n", i);
-		GDALColorEntry ce;
-		int cv = (int)color->value;
-		float ct = data.prod.thresholds[cv];
+
+	for (i = 0; i <= 15 ; i++) {
+		GDALColorEntry ce = {};
+		float ct = data.prod.thresholds[i];
 		char *c = color_checkscale(colors, ct);
 		sscanf(c, "%2x%2x%2x", &(ce.c1), &(ce.c2), &(ce.c3));
-		
-		if (color->value)
-				ce.c4 = 255;
+		if (!ce.c1 && !ce.c2 && !ce.c3)
+			ce.c4 = 0;
 		else
-				ce.c4 = 0;
-			
+			ce.c4 = 255;
+		
 		GDALSetColorEntry (hColorTable, i, &ce);
 	}
 	
@@ -149,7 +146,7 @@ int main (int argc, char **argv) {
 	
 	/***** write the raster *****/
 	
-	GDALRasterIO(hBand, GF_Write, 0, i,
+	GDALRasterIO(hBand, GF_Write, 0, 0,
 								 width, height,
 								 rast,
 								 width, height,

@@ -237,7 +237,11 @@ GDALDatasetH gdal_create (
 	char **papszMetadata;
 	GDALDriverH hDriver;
 	GDALDatasetH hDstDS;        
-	char **papszOptions = NULL;
+	char *papszOptions[] = {
+		"NBITS=4",
+		"COMPRESSED=YES",
+		NULL
+	};
 	
 	if(!(hDriver = GDALGetDriverByName(drivername)))
 		ERROR("GDALGetDriverByName");
