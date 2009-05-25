@@ -57,8 +57,8 @@ nids="$1"
 tmpkml="/tmp/${prod}.kml"
 kml="$kmldisk/${prod}.kml"
 
-tiff="/tmp/${prod}.${3}.${4}.${station}.tiff"
-warp="$wwwdisk/${prod}.$newfdate.${station}.tiff"
+img="/tmp/${prod}.${3}.${4}.${station}.img"
+warp="$wwwdisk/${prod}.$newfdate.${station}.img"
 basewarp=$(basename "$warp")
 
 tmp_tindex="/tmp/${prod}"
@@ -69,18 +69,17 @@ mapfile="$wwwdisk/${prod}.map"
 
 ##### decode #####
 
-
-nice -n 5 NIDS2gdal -n "$nids" -o "$tiff"
+nice -n 5 NIDS2gdal -n "$nids" -o "$img"
 
 rm "$nids"
 
 ##### warp #####
 
-nice -n 5 gdalwarp -co TILED=YES -t_srs "$srs" "$tiff" "$warp"
+nice -n 5 gdalwarp -of hfa -co compressed=yes -co nbits=4 -t_srs "$srs" "$img" "$warp"
 
-if [[ -f "$tiff" ]]
+if [[ -f "$img" ]]
 then
-	rm "$tiff"
+	rm "$img"
 fi
 
 ##### lock #####
@@ -263,11 +262,5 @@ fi
 
 rmdir "/tmp/${prod}.lock"
 
-##### cleanup old #####
-
-#psql radar -c "delete from n0r where time < now() - interval '3 hours';"
-#psql radar -c "VACUUM n0r;"
-
-find "$wwwdisk/" -mmin +180 -name "*.tiff" -exec rm -f {} \;
 
 
