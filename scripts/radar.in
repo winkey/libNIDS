@@ -162,7 +162,9 @@ fi
 starttime=$(psql radar -q -P tuples_only -c "select time \
                                                FROM n0r \
                                                ORDER BY time asc \
-                                               LIMIT 1;" | sed 's/ /T/')
+                                               LIMIT 1;" |\
+						 sed 's/^ //' |\
+						 sed 's/ /T/')
 
 
 cat > "$mapfile" <<EOF
