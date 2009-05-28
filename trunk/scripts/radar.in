@@ -67,6 +67,13 @@ sqltindex="/tmp/${prod}.sqlite"
 
 mapfile="$wwwdisk/${prod}.map"
 
+##### make sure the output dir exsists #####
+
+if [[ ! -d "$wwwdisk/${3}"]]
+then
+	mkdir -p "$wwwdisk/${3}"
+fi
+
 ##### decode #####
 
 nice -n 5 NIDS2gdal -n "$nids" -o "$img"
