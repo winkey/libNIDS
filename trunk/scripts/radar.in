@@ -150,10 +150,8 @@ ogr2ogr -update -append -a_srs "EPSG:4326" -f PostgreSQL PG:dbname=radar "$tmp_t
 
 ##### add the timestamp to the new tindex #####
 
-if psql -d radar -c "ALTER TABLE $prodlower ADD time timestamp;"
-then
-	psql -d radar -c "UPDATE $prodlower SET time = '$time' WHERE location = '$warp';"
-fi
+psql -d radar -c "ALTER TABLE $prodlower ADD time timestamp;"
+psql -d radar -c "UPDATE $prodlower SET time = '$time' WHERE location = '$warp';"
 
 if [[ -f "$tmp_tindex.shp" ]]
 then
