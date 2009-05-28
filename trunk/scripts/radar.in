@@ -58,7 +58,7 @@ tmpkml="/tmp/${prod}.kml"
 kml="$kmldisk/${prod}.kml"
 
 img="/tmp/${prod}.${3}.${4}.${station}.img"
-warp="$wwwdisk/${prod}.$newfdate.${station}.img"
+warp="$wwwdisk/${3}/${prod}.$newfdate.${station}.img"
 basewarp=$(basename "$warp")
 
 tmp_tindex="/tmp/${prod}"
