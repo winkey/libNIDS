@@ -66,6 +66,12 @@ char *parse_radial(char *buf, NIDS_radial *r) {
 	int i;
 	
 	r->num_rle = GET2(buf);
+	
+	/***** detect bad data *****/
+	
+	if (r->num_rle == 0)
+			ERROR("parse_radial: can't have 0 rle's");
+	
 	r->start = GET2(buf + 2);
 	r->start /= 10;
 	r->delta = GET2(buf + 4);

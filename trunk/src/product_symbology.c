@@ -60,7 +60,7 @@ char *parse_symbology_packet (char *buf, NIDS_symbology_packet *l) {
 	l->data_type = GET2(buf);
 		
 	p = buf + 2;
-		
+	
 	switch (l->data_type) {
 		case RADIAL:
 			p = parse_radial_header(p, &(l->rad));
@@ -253,6 +253,7 @@ char *parse_product_symbology(char *buf, NIDS_product_symbology *s) {
 	p = buf + 10;
 	
 	for (i = 0 ; i < s->num_layers ; i++) {
+		
 		p = parse_symbology_layer(p, s->layers + i);
 		//p += s->layers[i].length;
 	}
