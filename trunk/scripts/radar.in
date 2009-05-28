@@ -69,7 +69,7 @@ mapfile="$wwwdisk/${prod}.map"
 
 ##### make sure the output dir exsists #####
 
-if [[ ! -d "$wwwdisk/${3}"]]
+if [[ ! -d "$wwwdisk/${3}" ]]
 then
 	mkdir -p "$wwwdisk/${3}"
 fi
@@ -105,8 +105,8 @@ cd "${wwwdisk}/"
 if createdb radar
 then
 	createlang plpgsql radar
-	psql -d radar -f /usr/share/lwpostgis.sql
-	psql -d radar -f /usr/share/spatial_ref_sys.sql
+	psql -d radar -f /usr/share/pgsql/contrib/lwpostgis.sql
+	psql -d radar -f /usr/share/pgsql/contrib/spatial_ref_sys.sql
 	
 	psql -d radar -c "ALTER TABLE $prodlower ADD time timestamp;"
 	psql -d radar -c "create index idx_time on $prodlower (time);"
