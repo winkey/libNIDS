@@ -43,7 +43,7 @@ int main (int argc, char **argv) {
 	char *rast = NULL;
 	char *scalename = NULL;
 	
-	NIDS_color *colors = NULL;
+	
 	
 	
 	GDALDatasetH out_DS;
@@ -120,24 +120,25 @@ int main (int argc, char **argv) {
 	GDALColorTableH hColorTable = GDALCreateColorTable(GPI_RGB);
 	
 	/***** fill the color table *****/
-	
+	NIDS_color *colors = NULL;
 	if (!scalename)
 		get_product_dependent_color(data.msg.code, &colors);
 	else
 		colors = color_getscale(scalename);
 	
-
-	for (i = 0; i <= 15 ; i++) {
+	NIDS_color *color = NULL;
+	i = 0;
+	for (color = colors ; *(color->color) ; color++) {
 		GDALColorEntry ce = {};
-		float ct = data.prod.thresholds[i];
-		char *c = color_checkscale(colors, ct);
-		sscanf(c, "%2x%2x%2x", &(ce.c1), &(ce.c2), &(ce.c3));
+		
+		sscanf(color->color, "%2x%2x%2x", &(ce.c1), &(ce.c2), &(ce.c3));
 		if (!ce.c1 && !ce.c2 && !ce.c3)
 			ce.c4 = 0;
 		else
 			ce.c4 = 255;
 		
 		GDALSetColorEntry (hColorTable, i, &ce);
+		i++;
 	}
 	
 	/***** set the color table *****/

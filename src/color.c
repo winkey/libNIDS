@@ -77,12 +77,13 @@ NIDS_color *color_getscale(
 		
 		if (2 == sscanf(line, "%f %6[0-9a-fA-F]", &((scales[used]).value), (scales[used]).color)) {
 			scales[used].color[6] = 0;
+			printf("scales[%i].value = %f scales[%i].color = %s\n", used, scales[used].value, used, scales[used].color);
 			used++;
 		}
 		
+		
 		scales[used].value = 0;
 		scales[used].color[0] = 0;
-
 	}
 	
 		 
