@@ -61,7 +61,7 @@ img="/tmp/${prod}.${3}.${4}.${station}.img"
 warp="$wwwdisk/${3}/${prod}.$newfdate.${station}.img"
 basewarp=$(basename "$warp")
 
-tmp_tindex="/tmp/${prod}"
+tmp_tindex="/tmp/${prod}.${3}.${4}"
 tindex="$wwwdisk/${prod}"
 sqltindex="/tmp/${prod}.sqlite"
 
@@ -89,12 +89,7 @@ then
 	rm "$img"
 fi
 
-##### lock #####
 
-while ! mkdir "/tmp/${prod}.lock"
-do
-	sleep 1
-done
 
 ##### tileindex #####
 
@@ -108,8 +103,7 @@ then
 	psql -d radar -f /usr/share/pgsql/contrib/lwpostgis.sql
 	psql -d radar -f /usr/share/pgsql/contrib/spatial_ref_sys.sql
 	
-	psql -d radar -c "ALTER TABLE $prodlower ADD time timestamp;"
-	psql -d radar -c "create index idx_time on $prodlower (time);"
+
 fi
 
 
@@ -150,7 +144,11 @@ ogr2ogr -update -append -a_srs "EPSG:4326" -f PostgreSQL PG:dbname=radar "$tmp_t
 
 ##### add the timestamp to the new tindex #####
 
-psql -d radar -c "ALTER TABLE $prodlower ADD time timestamp;"
+if psql -d radar -c "ALTER TABLE $prodlower ADD time timestamp;"
+then
+	psql -d radar -c "create index idx_time on $prodlower (time);"
+fi
+
 psql -d radar -c "UPDATE $prodlower SET time = '$time' WHERE location = '$warp';"
 
 if [[ -f "$tmp_tindex.shp" ]]
@@ -160,7 +158,12 @@ then
         rm "$tmp_tindex.shx"
 fi
 
+##### lock #####
 
+while ! mkdir "/tmp/${prod}.lock"
+do
+	sleep 1
+done
 
 ##### mapfile #####
 
@@ -266,6 +269,8 @@ EOF
 	mv -f "$tmpkml" "$kml"
 
 fi
+
+##### remove lock #####
 
 rmdir "/tmp/${prod}.lock"
 

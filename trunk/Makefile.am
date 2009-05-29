@@ -8,7 +8,7 @@ SUBDIRS = src \
 	scripts  \
 	etc  \
 	kml  \
-	images
+	images  
 
 libnidsdocdir = ${prefix}/doc/libnids
 libnidsdoc_DATA = \
