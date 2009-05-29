@@ -1,5 +1,36 @@
-NNEXRAD	.*/p(...)(...)
+NNEXRAD	.*/p(N0R)(...)
 	FILE	data/NNEXRAD/%Y%m%d/\1/%H:%M:%S.p\1\2
 
-NNEXRAD	.*/p(...)(...)
+NNEXRAD	.*/p(N0R)(...)
 	EXEC	-wait @bindir@/radar.sh  data/NNEXRAD/%Y%m%d/\1/%H:%M:%S.p\1\2 \1 %Y%m%d %H:%M \2
+
+NNEXRAD	.*/p(N1R)(...)
+	FILE	data/NNEXRAD/%Y%m%d/\1/%H:%M:%S.p\1\2
+
+NNEXRAD	.*/p(N1R)(...)
+	EXEC	-wait @bindir@/radar.sh  data/NNEXRAD/%Y%m%d/\1/%H:%M:%S.p\1\2 \1 %Y%m%d %H:%M \2
+
+NNEXRAD	.*/p(N2R)(...)
+	FILE	data/NNEXRAD/%Y%m%d/\1/%H:%M:%S.p\1\2
+
+NNEXRAD	.*/p(N2R)(...)
+	EXEC	-wait @bindir@/radar.sh  data/NNEXRAD/%Y%m%d/\1/%H:%M:%S.p\1\2 \1 %Y%m%d %H:%M \2
+
+NNEXRAD	.*/p(N3R)(...)
+	FILE	data/NNEXRAD/%Y%m%d/\1/%H:%M:%S.p\1\2
+
+NNEXRAD	.*/p(N3R)(...)
+	EXEC	-wait @bindir@/radar.sh  data/NNEXRAD/%Y%m%d/\1/%H:%M:%S.p\1\2 \1 %Y%m%d %H:%M \2
+
+NNEXRAD	.*/p(N0V)(...)
+	FILE	data/NNEXRAD/%Y%m%d/\1/%H:%M:%S.p\1\2
+
+NNEXRAD	.*/p(N0V)(...)
+	EXEC	-wait @bindir@/radar.sh  data/NNEXRAD/%Y%m%d/\1/%H:%M:%S.p\1\2 \1 %Y%m%d %H:%M \2
+
+NNEXRAD	.*/p(N1V)(...)
+	FILE	data/NNEXRAD/%Y%m%d/\1/%H:%M:%S.p\1\2
+
+NNEXRAD	.*/p(N1V)(...)
+	EXEC	-wait @bindir@/radar.sh  data/NNEXRAD/%Y%m%d/\1/%H:%M:%S.p\1\2 \1 %Y%m%d %H:%M \2
+

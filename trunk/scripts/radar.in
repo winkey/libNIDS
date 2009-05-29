@@ -61,7 +61,7 @@ img="/tmp/${prod}.${3}.${4}.${station}.img"
 warp="$wwwdisk/${3}/${prod}.$newfdate.${station}.img"
 basewarp=$(basename "$warp")
 
-tmp_tindex="/tmp/${prod}.${3}.${4}"
+tmp_tindex="/tmp/${prod}"
 tindex="$wwwdisk/${prod}"
 sqltindex="/tmp/${prod}.sqlite"
 
