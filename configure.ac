@@ -46,6 +46,19 @@ AC_ARG_WITH(wwwdisk,
   [AC_MSG_FAILURE([--with-wwwdisk=/some/path MUST be specified])]
 )
 
+AC_ARG_WITH(cgidisk,
+  [AS_HELP_STRING([--with-cgidisk=/some/path],
+    [base dir to output cgi scripts])],
+  if test -n "$withval"
+  then
+    CGIDISK="$withval"
+    AC_SUBST(WWWDISK)
+  else
+		[AC_MSG_FAILURE([--with-cgidisk=/some/path MUST be specified])]
+	fi,
+  [AC_MSG_FAILURE([--with-cgidisk=/some/path MUST be specified])]
+)
+
 AC_MSG_CHECKING([how to link PROJ.4 library])
 
 AC_ARG_WITH(static_proj4,[  --with-static-proj4=ARG Compile with PROJ.4 statically (ARG=no or path)],,)
@@ -128,10 +141,12 @@ AC_SUBST(PROJ_INCLUDE)
 AC_OUTPUT([
 Makefile
 apps/Makefile
+cgi/Makefile
 etc/Makefile
 images/Makefile
 include/Makefile
 kml/Makefile
+map/Makefile
 scripts/Makefile
 share/Makefile
 src/Makefile

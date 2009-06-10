@@ -32,7 +32,7 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-subdir = kml
+subdir = cgi
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.ac
@@ -49,9 +49,9 @@ am__vpath_adj = case $$p in \
     *) f=$$p;; \
   esac;
 am__strip_dir = `echo $$p | sed -e 's|^.*/||'`;
-am__installdirs = "$(DESTDIR)$(wwwdir)"
-wwwDATA_INSTALL = $(INSTALL_DATA)
-DATA = $(www_DATA)
+am__installdirs = "$(DESTDIR)$(cgidir)"
+cgiDATA_INSTALL = $(INSTALL_DATA)
+DATA = $(cgi_DATA)
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = @ACLOCAL@
 AMTAR = @AMTAR@
@@ -169,15 +169,21 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 www = @WWW@
 wwwdisk = @WWWDISK@
-wwwdir = ${wwwdisk}/kml
-www_DATA = \
-	radar.kml
+cgidisk = @CGIDISK@
+cgidir = ${cgidisk}
+cgi_DATA = \
+	radar \
+	radarwrap \
+	radar_wms
 
 EXTRA_DIST = \
-	radar.kml.in
+	radar.in \
+	radarwrap.in \
+	radar_wms.in
 
 do_subst = sed -e 's,[@]bindir[@],$(bindir),g' \
 							 -e 's,[@]wwwdisk[@],$(wwwdisk),g' \
+							 -e 's,[@]cgidisk[@],$(cgidisk),g' \
 							 -e 's,[@]www[@],$(www),g'
 
 all: all-am
@@ -192,9 +198,9 @@ $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__confi
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --gnu  kml/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --gnu  cgi/Makefile'; \
 	cd $(top_srcdir) && \
-	  $(AUTOMAKE) --gnu  kml/Makefile
+	  $(AUTOMAKE) --gnu  cgi/Makefile
 .PRECIOUS: Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
@@ -218,22 +224,22 @@ mostlyclean-libtool:
 
 clean-libtool:
 	-rm -rf .libs _libs
-install-wwwDATA: $(www_DATA)
+install-cgiDATA: $(cgi_DATA)
 	@$(NORMAL_INSTALL)
-	test -z "$(wwwdir)" || $(MKDIR_P) "$(DESTDIR)$(wwwdir)"
-	@list='$(www_DATA)'; for p in $$list; do \
+	test -z "$(cgidir)" || $(MKDIR_P) "$(DESTDIR)$(cgidir)"
+	@list='$(cgi_DATA)'; for p in $$list; do \
 	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
 	  f=$(am__strip_dir) \
-	  echo " $(wwwDATA_INSTALL) '$$d$$p' '$(DESTDIR)$(wwwdir)/$$f'"; \
-	  $(wwwDATA_INSTALL) "$$d$$p" "$(DESTDIR)$(wwwdir)/$$f"; \
+	  echo " $(cgiDATA_INSTALL) '$$d$$p' '$(DESTDIR)$(cgidir)/$$f'"; \
+	  $(cgiDATA_INSTALL) "$$d$$p" "$(DESTDIR)$(cgidir)/$$f"; \
 	done
 
-uninstall-wwwDATA:
+uninstall-cgiDATA:
 	@$(NORMAL_UNINSTALL)
-	@list='$(www_DATA)'; for p in $$list; do \
+	@list='$(cgi_DATA)'; for p in $$list; do \
 	  f=$(am__strip_dir) \
-	  echo " rm -f '$(DESTDIR)$(wwwdir)/$$f'"; \
-	  rm -f "$(DESTDIR)$(wwwdir)/$$f"; \
+	  echo " rm -f '$(DESTDIR)$(cgidir)/$$f'"; \
+	  rm -f "$(DESTDIR)$(cgidir)/$$f"; \
 	done
 tags: TAGS
 TAGS:
@@ -272,7 +278,7 @@ check-am: all-am
 check: check-am
 all-am: Makefile $(DATA)
 installdirs:
-	for dir in "$(DESTDIR)$(wwwdir)"; do \
+	for dir in "$(DESTDIR)$(cgidir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
 install: install-am
@@ -317,7 +323,7 @@ info: info-am
 
 info-am:
 
-install-data-am: install-wwwDATA
+install-data-am: install-cgiDATA
 
 install-dvi: install-dvi-am
 
@@ -351,25 +357,34 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-wwwDATA
+uninstall-am: uninstall-cgiDATA
 
 .MAKE: install-am install-strip
 
 .PHONY: all all-am check check-am clean clean-generic clean-libtool \
 	distclean distclean-generic distclean-libtool distdir dvi \
 	dvi-am html html-am info info-am install install-am \
-	install-data install-data-am install-dvi install-dvi-am \
-	install-exec install-exec-am install-html install-html-am \
-	install-info install-info-am install-man install-pdf \
-	install-pdf-am install-ps install-ps-am install-strip \
-	install-wwwDATA installcheck installcheck-am installdirs \
+	install-cgiDATA install-data install-data-am install-dvi \
+	install-dvi-am install-exec install-exec-am install-html \
+	install-html-am install-info install-info-am install-man \
+	install-pdf install-pdf-am install-ps install-ps-am \
+	install-strip installcheck installcheck-am installdirs \
 	maintainer-clean maintainer-clean-generic mostlyclean \
 	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
-	uninstall uninstall-am uninstall-wwwDATA
+	uninstall uninstall-am uninstall-cgiDATA
 
 
-radar.kml: radar.kml.in Makefile
-	$(do_subst) < $(srcdir)/radar.kml.in > radar.kml
+radar: radar.in Makefile
+	$(do_subst) < $(srcdir)/radar.in > radar
+	chmod +x radar
+
+radarwrap: radarwrap.in Makefile
+	$(do_subst) < $(srcdir)/radarwrap.in > radarwrap
+	chmod +x radarwrap
+
+radar_wms: radar_wms.in Makefile
+	$(do_subst) < $(srcdir)/radar_wms.in > radar_wms
+	chmod +x radar_wms
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

@@ -1,78 +1,59 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<kml xmlns="http://earth.google.com/kml/2.2">
-<Folder>
-	<name>Radar Imagery</name>
-	<Style>
-		<ListStyle>
-			<listItemType>radioFolder</listItemType>
-			<bgColor>00ffffff</bgColor>
-		</ListStyle>
-	</Style>
+<kml xmlns="http://www.opengis.net/kml/2.2" xmlns:gx="http://www.google.com/kml/ext/2.2" xmlns:kml="http://www.opengis.net/kml/2.2" xmlns:atom="http://www.w3.org/2005/Atom">
+<Document>
 	<Folder>
-		<name>off</name>
+		<name>Radar Imagery</name>
+		<Style>
+			<ListStyle>
+				<listItemType>radioFolder</listItemType>
+				<bgColor>00ffffff</bgColor>
+			</ListStyle>
+		</Style>
+		<Folder>
+			<name>off</name>
+		</Folder>
+		<NetworkLink>
+			<name>.5 deg elevation reflectivity</name>
+			<visibility>0</visibility>
+			<Link>
+				<href>@www@/cgi-bin/radarwrap?prod=n0r</href>
+			</Link>
+		</NetworkLink>
+		<NetworkLink>
+			<name>1.5 deg elevation reflectivity</name>
+			<visibility>0</visibility>
+			<Link>
+				<href>@www@/cgi-bin/radarwrap?prod=n2r</href>
+			</Link>
+		</NetworkLink>
+		<NetworkLink>
+			<name>2.5 deg elevation reflectivity</name>
+			<visibility>0</visibility>
+			<Link>
+				<href>@www@/cgi-bin/radarwrap?prod=n2r</href>
+			</Link>
+		</NetworkLink>
+		<NetworkLink>
+			<name>3.5 deg elevation reflectivity</name>
+			<visibility>0</visibility>
+			<Link>
+				<href>@www@/cgi-bin/radarwrap?prod=n3r</href>
+			</Link>
+		</NetworkLink>
+		<NetworkLink>
+			<name>.5 deg elevation velocity</name>
+			<visibility>0</visibility>
+			<Link>
+				<href>@www@/cgi-bin/radarwrap?prod=n0v</href>
+			</Link>
+		</NetworkLink>
+		<NetworkLink>
+			<name>1.5 deg elevation velocity</name>
+			<visibility>0</visibility>
+			<Link>
+				<href>@www@/cgi-bin/radarwrap?prod=n1v</href>
+			</Link>
+		</NetworkLink>
 	</Folder>
-	<NetworkLink>
-		<name>.5 deg elevation reflectivity</name>
-		<visibility>0</visibility>
-		<Link>
-			<href>@www@/kml/radar/N0R.kml?</href>
-			<viewRefreshMode>onStop</viewRefreshMode>
-			<viewRefreshTime>0</viewRefreshTime>
-		</Link>
-	</NetworkLink>
-	<NetworkLink>
-		<name>1.5 deg elevation reflectivity</name>
-		<visibility>0</visibility>
-		<Link>
-			<href>@www@/kml/radar/N1R.kml?</href>
-			<viewRefreshMode>onStop</viewRefreshMode>
-			<viewRefreshTime>0</viewRefreshTime>
-		</Link>
-	</NetworkLink>
-	<NetworkLink>
-		<name>2.5 deg elevation reflectivity</name>
-		<visibility>0</visibility>
-		<Link>
-			<href>@www@/kml/radar/N2R.kml?</href>
-			<viewRefreshMode>onStop</viewRefreshMode>
-			<viewRefreshTime>0</viewRefreshTime>
-		</Link>
-	</NetworkLink>
-	<NetworkLink>
-		<name>3.5 deg elevation reflectivity</name>
-		<visibility>0</visibility>
-		<Link>
-			<href>@www@/kml/radar/N3R.kml?</href>
-			<viewRefreshMode>onStop</viewRefreshMode>
-			<viewRefreshTime>0</viewRefreshTime>
-		</Link>
-	</NetworkLink>
-	<NetworkLink>
-		<name>.5 deg elevation velocity</name>
-		<visibility>0</visibility>
-		<Link>
-			<href>@www@/kml/radar/N0V.kml?</href>
-			<viewRefreshMode>onStop</viewRefreshMode>
-			<viewRefreshTime>0</viewRefreshTime>
-		</Link>
-	</NetworkLink>
-	<NetworkLink>
-		<name>1.5 deg elevation velocity</name>
-		<visibility>0</visibility>
-		<Link>
-			<href>@www@/kml/radar/N1V.kml?</href>
-			<viewRefreshMode>onStop</viewRefreshMode>
-			<viewRefreshTime>0</viewRefreshTime>
-		</Link>
-	</NetworkLink>
-	<NetworkLink>
-		<name>Composite reflectivity</name>
-		<visibility>0</visibility>
-		<Link>
-			<href>@www@/kml/radar/NCR.kml?</href>
-			<viewRefreshMode>onStop</viewRefreshMode>
-			<viewRefreshTime>0</viewRefreshTime>
-		</Link>
-	</NetworkLink>
-</Folder>
+</Document>
 </kml>
