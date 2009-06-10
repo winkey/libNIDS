@@ -27,10 +27,9 @@ prod=$2
 period=10
 
 unixtime=$(date -u -d "${3} ${4}" +%s)
-time=$(date -u -d @$unixtime "+%Y-%m-%dT%H:%M")
-newfdate=$(date -u -d @$unixtime "+%Y%m%d.%H%M")
+time=$(date -u -d @$unixtime "+%Y-%m-%d %H:%M:%S")
+newfdate=$(date -u -d @$unixtime "+%Y%m%d.%H%M:%S")
 
-endtime=$(date -u -d @$(($unixtime + 60)) "+%Y-%m-%dT%H:%M")
 ##### dirs #####
 
 wwwdisk="@wwwdisk@/radar"
@@ -61,9 +60,7 @@ img="/tmp/${prod}.${3}.${4}.${station}.img"
 warp="$wwwdisk/${3}/${prod}.$newfdate.${station}.img"
 basewarp=$(basename "$warp")
 
-tmp_tindex="/tmp/${prod}"
 tindex="$wwwdisk/${prod}"
-sqltindex="/tmp/${prod}.sqlite"
 
 mapfile="$wwwdisk/${prod}.map"
 
@@ -80,20 +77,17 @@ nice -n 5 NIDS2gdal -n "$nids" -o "$img"
 
 rm "$nids"
 
+##### did it decode? #####
+
+if [[ ! -f "$img" ]]
+then
+	exit
+fi
+
 ##### warp #####
 
 nice -n 5 gdalwarp -of hfa -co compressed=yes -co nbits=4 -t_srs "$srs" "$img" "$warp"
-
-if [[ -f "$img" ]]
-then
-	rm "$img"
-fi
-
-
-
-##### tileindex #####
-
-cd "${wwwdisk}/"
+rm "$img"
 
 ##### does the db need setup? #####
 
@@ -102,61 +96,14 @@ then
 	createlang plpgsql radar
 	psql -d radar -f /usr/share/pgsql/contrib/lwpostgis.sql
 	psql -d radar -f /usr/share/pgsql/contrib/spatial_ref_sys.sql
-	
-
 fi
 
-
-##### if there is already a image for this station dupe #####
-
-lasttime=$(psql -d radar -t -c "SELECT time from $prodlower \
-																	WHERE location LIKE '%${station}%' \
-																	ORDER BY time desc \
-																	LIMIT 1;")
-
-
-if [[ "$lasttime" != "" ]]  && [[ $(($(date "+%s" -d "$lasttime UTC") + 60)) -lt "$unixtime" ]]
-then
-  dupestart=$(($(date "+%s" -d "$lasttime UTC") + 60))
-  dupeend=$(($unixtime - 60))
-  if [[ "$(($dupestart + 600))" -lt "$dupeend" ]]
-  then
-		dupeend=$(($dupestart + 600))
-	fi
-
-	for t in `seq $dupestart 60 $dupeend`
-	do
-		psql -d radar -c "INSERT INTO $prodlower (wkb_geometry, location, time) \
-													SELECT wkb_geometry, location, time + interval '1 minutes' \
-														FROM $prodlower \
-														WHERE location \
-														LIKE '%${station}%' \
-														ORDER BY time desc \
-														LIMIT 1;"
-	done
-fi
+cd "${wwwdisk}/"
 
 ##### add the tindex for this image #####
 
-gdaltindex "$tmp_tindex.shp" "$warp"
+tileindex -i "$warp" -f PostgreSQL -o "PG:dbname=radar" -l $prodlower -F time -t $time
 psql -d radar -c "create index idx_time on $prodlower (time);"
-ogr2ogr -update -append -a_srs "EPSG:4326" -f PostgreSQL PG:dbname=radar "$tmp_tindex.shp"
-
-##### add the timestamp to the new tindex #####
-
-if psql -d radar -c "ALTER TABLE $prodlower ADD time timestamp;"
-then
-	psql -d radar -c "create index idx_time on $prodlower (time);"
-fi
-
-psql -d radar -c "UPDATE $prodlower SET time = '$time' WHERE location = '$warp';"
-
-if [[ -f "$tmp_tindex.shp" ]]
-then
-        rm "$tmp_tindex.shp"
-        rm "$tmp_tindex.dbf"
-        rm "$tmp_tindex.shx"
-fi
 
 ##### lock #####
 
@@ -168,7 +115,7 @@ done
 ##### mapfile #####
 
 starttime=$(psql radar -q -P tuples_only -c "select time \
-                                               FROM n0r \
+                                               FROM ${prodlower} \
                                                ORDER BY time asc \
                                                LIMIT 1;" |\
 						 sed 's/^ //' |\
@@ -181,14 +128,14 @@ cat > "$mapfile" <<EOF
     NAME 'Radar_${2}_idx'
     TYPE POLYGON
     STATUS ON
-    DATA 'wkb_geometry FROM ${prodlower} using unique wkb_geometry'
+		DATA "wkb_geometry FROM (select ogc_fid, location, wkb_geometry, timestamp '%time%' AS time FROM ${prodlower} WHERE (wkb_geometry, time) IN (SELECT wkb_geometry, max(time) AS time FROM ${prodlower} WHERE time <= '%time%' AND time >= timestamp '%time%' - INTERVAL '10 min' GROUP BY wkb_geometry) ORDER BY wkb_geometry ) AS bar USING UNIQUE ogc_fid USING SRID=4326"
     METADATA
       'wms_title'        '$2'
       'wms_srs'          'EPSG:900913 EPSG:4326'
       'wms_extent'       '-180 -90 180 90'
-      'wms_timeextent'   '${starttime}Z/${time}:00Z/P1M'
+      'wms_timeextent'   '${starttime}Z/${time}Z/P1M'
       'wms_timeitem'     'time'
-      'wms_timedefault'  '${time}:00'
+      'wms_timedefault'  '${time}Z'
     END
     CONNECTION 'dbname=radar'
     CONNECTIONTYPE postgis
@@ -211,9 +158,9 @@ cat > "$mapfile" <<EOF
       'wms_title'        '$2'
       'wms_srs'          'EPSG:900913 EPSG:4326'
       'wms_extent'       '-180 -90 180 90'
-      'wms_timeextent'   '${starttime}Z/${time}:00Z/P1M'
+      'wms_timeextent'   '${starttime}Z/${time}Z/P1M'
       'wms_timeitem'     'time'
-      'wms_timedefault'  '${time}:00'
+      'wms_timedefault'  '${time}'
     END
 #    OFFSITE 0 0 0
     TILEITEM 'location'
@@ -221,54 +168,7 @@ cat > "$mapfile" <<EOF
   END
 EOF
 
-##### kml #####
 
-part1="${www}/cgi-bin/radar_wms?SERVICE=WMS&amp;VERSION=1.1.1"
-part2="&amp;REQUEST=GetMap&amp;SRS=EPSG:4326"
-part3="&amp;LAYERS=Radar_$2"
-part4="&amp;TRANSPARENT=TRUE&amp;FORMAT=image/png"
-part5="&amp;time=$time"
-
-if [[ "$(grep "$kml" -e "<begin>${time}:00Z</begin>")" = "" ]]
-then
-
-	cat > $tmpkml <<EOF
-<?xml version="1.0" encoding="UTF-8"?>
-<kml xmlns="http://earth.google.com/kml/2.2">
-<Document>
-<GroundOverlay id='1'>
-  <Icon>
-    <href>${part1}${part2}${part3}${part4}${part5}</href>
-    <viewRefreshMode>onStop</viewRefreshMode>
-    <viewRefreshTime>1</viewRefreshTime>
-    <viewFormat>
-      BBOX=[bboxWest],[bboxSouth],[bboxEast],[bboxNorth]&amp;WIDTH=[horizPixels]&amp;HEIGHT=[vertPixels]
-    </viewFormat>
-  </Icon>
-  <TimeSpan>
-    <begin>${time}:00Z</begin>
-    <end>${endtime}:00Z</end>
-  </TimeSpan>
-</GroundOverlay>
-$(
-  if [[ -f $kml ]]
-  then
-    kmldata=$(cat $kml)
-    for i in $( seq 1 179)
-    do
-      echo "$kmldata" |\
-       grep -A13 -e "<GroundOverlay id=.${i}.>" |\
-       sed "s/GroundOverlay id='${i}'/GroundOverlay id='$(($i + 1))'/"
-    done
-  fi
-)
-</Document>
-</kml>
-EOF
-
-	mv -f "$tmpkml" "$kml"
-
-fi
 
 ##### remove lock #####
 
