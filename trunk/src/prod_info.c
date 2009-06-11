@@ -37,6 +37,12 @@ NIDS_prod_info prod_info[] = {
 	 .54, .54, 1.0, 124, 8, "Radial Image"},
 	{31, 32, "User Selectable Storm Total",
 	 1.1, 1.1, 1.0, 124, 16, "Radial Image/Geographic Alpha"},
+	{41, 8, "Echo Tops  ",
+		2.2, 2.2, 1.0, 124, 16, "Raster Image"},
+	{55, 16, "Storm Relative Mean Radial Velocity",
+	 .27, .27, 1.0, 27, 16, "Radial Image (Region)"},
+	{56, 16, "Storm Relative Mean Radial Velocity",
+	 .54, .54, 1.0, 124, 16, "Radial Image (Map)"},
 	{-1, -1, "", -1, -1, -1, -1, -1, ""},
 };
 /*
