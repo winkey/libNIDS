@@ -78,6 +78,8 @@ else
 	mystep=$default_step
 fi
 
+
+
 ##### step not set #####
 
 if [[ "$begin" != "" ]] && [[ "$end" != "" ]] && [[ "$numframes" != "" ]] && [[ "$step" == "" ]]

@@ -91,7 +91,7 @@ rm "$img"
 
 ##### does the db need setup? #####
 
-if createdb radar
+if createdb radar > /dev/null 2>&1
 then
 	createlang plpgsql radar
 	psql -d radar -f /usr/share/pgsql/contrib/lwpostgis.sql
@@ -102,12 +102,12 @@ cd "${wwwdisk}/"
 
 ##### add the tindex for this image #####
 
-tileindex -i "$warp" -f PostgreSQL -o "PG:dbname=radar" -l $prodlower -F time -t $time
-psql -d radar -c "create index idx_time on $prodlower (time);"
+tileindex -i "$warp" -f PostgreSQL -o "PG:dbname=radar" -l $prodlower -F time -t "$time"
+psql -d radar -c "create index idx_time on $prodlower (time);"  >/dev/null 2>&1
 
 ##### lock #####
 
-while ! mkdir "/tmp/${prod}.lock"
+while ! mkdir "/tmp/${prod}.lock" > /dev/null 2>&1
 do
 	sleep 1
 done
