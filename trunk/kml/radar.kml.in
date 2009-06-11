@@ -13,45 +13,80 @@
 			<name>off</name>
 		</Folder>
 		<NetworkLink>
-			<name>.5 deg elevation reflectivity</name>
+			<name>.5 deg elevation reflectivity 124 nmi range</name>
 			<visibility>0</visibility>
 			<Link>
 				<href>@www@/cgi-bin/radarwrap?prod=n0r</href>
 			</Link>
 		</NetworkLink>
 		<NetworkLink>
-			<name>1.5 deg elevation reflectivity</name>
+			<name>1.5 deg elevation reflectivity 124 nmi range</name>
 			<visibility>0</visibility>
 			<Link>
 				<href>@www@/cgi-bin/radarwrap?prod=n2r</href>
 			</Link>
 		</NetworkLink>
 		<NetworkLink>
-			<name>2.5 deg elevation reflectivity</name>
+			<name>2.5 deg elevation reflectivity 124 nmi range</name>
 			<visibility>0</visibility>
 			<Link>
 				<href>@www@/cgi-bin/radarwrap?prod=n2r</href>
 			</Link>
 		</NetworkLink>
 		<NetworkLink>
-			<name>3.5 deg elevation reflectivity</name>
+			<name>3.5 deg elevation reflectivity 124 nmi range</name>
 			<visibility>0</visibility>
 			<Link>
 				<href>@www@/cgi-bin/radarwrap?prod=n3r</href>
 			</Link>
 		</NetworkLink>
 		<NetworkLink>
-			<name>.5 deg elevation velocity</name>
+			<name>.5 deg elevation velocity 124 nmi range</name>
 			<visibility>0</visibility>
 			<Link>
 				<href>@www@/cgi-bin/radarwrap?prod=n0v</href>
 			</Link>
 		</NetworkLink>
 		<NetworkLink>
-			<name>1.5 deg elevation velocity</name>
+			<name>1.5 deg elevation velocity 124 nmi range</name>
 			<visibility>0</visibility>
 			<Link>
 				<href>@www@/cgi-bin/radarwrap?prod=n1v</href>
+			</Link>
+		</NetworkLink>
+		<NetworkLink>
+			<name>.5 deg elevation storm relative mean velocity</name>
+			<visibility>0</visibility>
+			<Link>
+				<href>@www@/cgi-bin/radarwrap?prod=n0s</href>
+			</Link>
+		</NetworkLink>
+		<NetworkLink>
+			<name>1.5 deg elevation storm relative mean velocity</name>
+			<visibility>0</visibility>
+			<Link>
+				<href>@www@/cgi-bin/radarwrap?prod=n2s</href>
+			</Link>
+		</NetworkLink>
+		<NetworkLink>
+			<name>2.5 deg elevation storm relative mean velocity</name>
+			<visibility>0</visibility>
+			<Link>
+				<href>@www@/cgi-bin/radarwrap?prod=n2s</href>
+			</Link>
+		</NetworkLink>
+		<NetworkLink>
+			<name>3.5 deg elevation storm relative mean velocity</name>
+			<visibility>0</visibility>
+			<Link>
+				<href>@www@/cgi-bin/radarwrap?prod=n3s</href>
+			</Link>
+		</NetworkLink>
+		<NetworkLink>
+			<name>Echo tops</name>
+			<visibility>0</visibility>
+			<Link>
+				<href>@www@/cgi-bin/radarwrap?prod=net</href>
 			</Link>
 		</NetworkLink>
 	</Folder>
