@@ -57,7 +57,7 @@ tmpkml="/tmp/${prod}.kml"
 kml="$kmldisk/${prod}.kml"
 
 img="/tmp/${prod}.${3}.${4}.${station}.img"
-warp="$wwwdisk/${3}/${prod}.$newfdate.${station}.img"
+warp="$wwwdisk/${3}/${prod}/$newfdate.${station}.img"
 basewarp=$(basename "$warp")
 
 tindex="$wwwdisk/${prod}"
@@ -66,9 +66,9 @@ mapfile="$wwwdisk/${prod}.map"
 
 ##### make sure the output dir exsists #####
 
-if [[ ! -d "$wwwdisk/${3}" ]]
+if [[ ! -d "$wwwdisk/${3}/${prod}" ]]
 then
-	mkdir -p "$wwwdisk/${3}"
+	mkdir -p "$wwwdisk/${3}/${prod}"
 fi
 
 ##### decode #####
