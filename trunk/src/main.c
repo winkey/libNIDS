@@ -100,7 +100,7 @@ void NIDS_read (FILE *fp, NIDS *data) {
 		
 		/***** read data *****/
 		
-		if (!(read = fread(buf.buf + buf.used, 1, buf.alloced - buf.used, fp))) {
+		if (!(read = fread(buf.buf + buf.used, 1, BUFSIZE, fp))) {
 			if (ferror(fp))
 				ERROR("NIDS_read");
 		}

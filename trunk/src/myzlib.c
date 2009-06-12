@@ -100,7 +100,7 @@ int unzlib(buffer *in, buffer *out) {
 				strm.avail_in = in->used - in->parsed;
 				strm.next_out = (unsigned char *)out->buf + out->used;
 				strm.avail_out = out->alloced - out->used;
-			
+				
 				/***** init *****/
 			
 				if (0 > (err = inflateInit(&strm)))
@@ -110,6 +110,12 @@ int unzlib(buffer *in, buffer *out) {
 			
 				if (0 > (err = inflate(&strm, Z_NO_FLUSH)))
 					ERROR(zerr(err));
+				
+				if (err > 1) {
+					if (0 > (err = inflateEnd(&strm)))
+						ERROR(zerr(err));
+					return err;
+				}
 				
 				/***** was the output buffer big enough *****/
 				
