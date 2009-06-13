@@ -33,19 +33,7 @@ newfdate=$(date -u -d @$unixtime "+%Y%m%d.%H%M:%S")
 ##### dirs #####
 
 wwwdisk="@wwwdisk@/radar"
-kmldisk="@wwwdisk@/kml/radar"
 www="@www@"
-wwwkml="@www@/kml/radar"
-
-if [[ ! -d "$wwwdisk" ]]
-then
-	mkdir -p "$wwwdisk"
-fi
-
-if [[ ! -d "$kmldisk" ]]
-then
-	mkdir -p "$kmldisk"
-fi
 
 ##### files #####
 
@@ -53,16 +41,9 @@ prodlower=$(echo "$prod" | tr [A-Z] [a-z])
 
 nids="$1"
 
-tmpkml="/tmp/${prod}.kml"
-kml="$kmldisk/${prod}.kml"
-
 img="/tmp/${prod}.${3}.${4}.${station}.img"
 warp="$wwwdisk/${3}/${prod}/$newfdate.${station}.img"
 basewarp=$(basename "$warp")
-
-tindex="$wwwdisk/${prod}"
-
-mapfile="$wwwdisk/${prod}.map"
 
 ##### make sure the output dir exsists #####
 
@@ -105,74 +86,8 @@ cd "${wwwdisk}/"
 tileindex -i "$warp" -f PostgreSQL -o "PG:dbname=radar" -l $prodlower -F time -t "$time"
 psql -d radar -c "create index idx_time on $prodlower (time);"  >/dev/null 2>&1
 
-##### lock #####
-
-while ! mkdir "/tmp/${prod}.lock" > /dev/null 2>&1
-do
-	sleep 1
-done
-
-##### mapfile #####
-
-starttime=$(psql radar -q -P tuples_only -c "select time \
-                                               FROM ${prodlower} \
-                                               ORDER BY time asc \
-                                               LIMIT 1;" |\
-						 sed 's/^ //' |\
-						 sed 's/ /T/')
 
 
-cat > "$mapfile" <<EOF
-# polygon layer
-  LAYER
-    NAME 'Radar_${2}_idx'
-    TYPE POLYGON
-    STATUS ON
-		DATA "wkb_geometry FROM (select ogc_fid, location, wkb_geometry, timestamp '%time%' AS time FROM ${prodlower} WHERE (wkb_geometry, time) IN (SELECT wkb_geometry, max(time) AS time FROM ${prodlower} WHERE time <= '%time%' AND time >= timestamp '%time%' - INTERVAL '10 min' GROUP BY wkb_geometry) ORDER BY wkb_geometry ) AS bar USING UNIQUE ogc_fid USING SRID=-1"
-    METADATA
-      'wms_title'        '$2'
-      'wms_srs'          'EPSG:900913 EPSG:4326'
-      'wms_extent'       '-180 -90 180 90'
-      'wms_timeextent'   '${starttime}Z/${time}Z/P1M'
-      'wms_timeitem'     'time'
-      'wms_timedefault'  '${time}Z'
-    END
-    CONNECTION 'dbname=radar'
-    CONNECTIONTYPE postgis
-  END
-
-# raster layer
-  LAYER
-    NAME 'Radar_${2}'
-    TYPE RASTER
-    STATUS ON
-    DUMP TRUE
-    PROJECTION
-     'proj=longlat'
-     'ellps=WGS84'
-     'datum=WGS84'
-     'no_defs'
-     ''
-    END
-    METADATA
-      'wms_title'        '$2'
-      'wms_srs'          'EPSG:900913 EPSG:4326'
-      'wms_extent'       '-180 -90 180 90'
-      'wms_timeextent'   '${starttime}Z/${time}Z/P1M'
-      'wms_timeitem'     'time'
-      'wms_timedefault'  '${time}'
-    END
-#    OFFSITE 0 0 0
-    TILEITEM 'location'
-    TILEINDEX 'Radar_${2}_idx'
-  END
-EOF
-
-
-
-##### remove lock #####
-
-rmdir "/tmp/${prod}.lock"
 
 
 

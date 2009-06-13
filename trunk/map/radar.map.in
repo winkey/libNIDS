@@ -83,12 +83,17 @@ MAP
 
 
   INCLUDE 'N0R.map'
-#  INCLUDE 'N1R.map'
-#  INCLUDE 'N2R.map'
-#  INCLUDE 'N3R.map'
+  INCLUDE 'N1R.map'
+  INCLUDE 'N2R.map'
+  INCLUDE 'N3R.map'
 
-#  INCLUDE 'N0V.map'
-#  INCLUDE 'N1V.map'
+  INCLUDE 'N0S.map'
+  INCLUDE 'N1S.map'
+  INCLUDE 'N2S.map'
+  INCLUDE 'N3S.map'
+
+  INCLUDE 'N0V.map'
+  INCLUDE 'N1V.map'
 #  INCLUDE 'NCR.map'
   
 
