@@ -37,24 +37,24 @@ starttime=$(psql radar -q -P tuples_only -c "select time \
                                                ORDER BY time ASC \
                                                LIMIT 1;")
 
-starttime=$(date -d "$starttime" "+%Y%m%dT%H:%M:%SZ")
+starttime=$(date -d "$starttime" "+%Y-%m-%dT%H:%M:%SZ")
 
 endtime=$(psql radar -q -P tuples_only -c "select time \
                                                FROM ${prodlower} \
                                                ORDER BY time DESC \
                                                LIMIT 1;")
 
-endtime=$(date -d "$endtime" "+%Y%m%dT%H:%M:%SZ")
+endtime=$(date -d "$endtime" "+%Y-%m-%dT%H:%M:%SZ")
 
 cat > "$mapfile" <<EOF
 # polygon layer
   LAYER
-    NAME 'Radar_${prod}_idx'
+    NAME 'Radar_${prodlower}_idx'
     TYPE POLYGON
     STATUS ON
 		DATA "wkb_geometry FROM (select ogc_fid, location, wkb_geometry, timestamp '%time%' AS time FROM ${prodlower} WHERE (wkb_geometry, time) IN (SELECT wkb_geometry, max(time) AS time FROM ${prodlower} WHERE time <= '%time%' AND time >= timestamp '%time%' - INTERVAL '10 min' GROUP BY wkb_geometry) ORDER BY wkb_geometry ) AS bar USING UNIQUE ogc_fid USING SRID=-1"
     METADATA
-      'wms_title'        '${prod}_idx'
+      'wms_title'        '${prod}'
       'wms_srs'          'EPSG:900913 EPSG:4326'
       'wms_extent'       '-180 -90 180 90'
       'wms_timeextent'   '${starttime}/${endtime}/P1M'
@@ -67,7 +67,7 @@ cat > "$mapfile" <<EOF
 
 # raster layer
   LAYER
-    NAME 'Radar_${prod}'
+    NAME 'Radar_${prodlower}'
     TYPE RASTER
     STATUS ON
     DUMP TRUE
@@ -88,7 +88,7 @@ cat > "$mapfile" <<EOF
     END
 #    OFFSITE 0 0 0
     TILEITEM 'location'
-    TILEINDEX 'Radar_${prod}_idx'
+    TILEINDEX 'Radar_${prodlower}_idx'
   END
 EOF
 																																																																																																																						
