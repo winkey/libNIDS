@@ -20,7 +20,7 @@
 #ifndef _COLOR_H
 #define _COLOR_H
 
-void get_product_dependent_color(int msgcode, NIDS_color **result);
+void get_product_dependent_color(int msgcode, int opmode, NIDS_color **result);
 
 
 #endif /* _COLOR_H */

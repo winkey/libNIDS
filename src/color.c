@@ -93,7 +93,7 @@ NIDS_color *color_getscale(
 }
 
 
-void get_product_dependent_color(int msgcode, NIDS_color **result) {
+void get_product_dependent_color(int msgcode, int opmode, NIDS_color **result) {
 	
 	switch (msgcode) {
 		case 16:
@@ -111,7 +111,11 @@ void get_product_dependent_color(int msgcode, NIDS_color **result) {
 		case 90:
 		case 95:
 		case 96:
-			*result = color_getscale("3bit_reflectivity");
+            if (opmode == 1) {
+    			*result = color_getscale("3bit_reflectivity_clear");
+            } else {
+    			*result = color_getscale("3bit_reflectivity");
+            }
 			break;
 		
 		case 19:
@@ -126,8 +130,11 @@ void get_product_dependent_color(int msgcode, NIDS_color **result) {
 		case 97:
 		case 98:
 		case 137:
-			*result = color_getscale("4bit_reflectivity");
-			break;
+			if (opmode == 1) {
+    			*result = color_getscale("4bit_reflectivity_clear");
+            } else {
+    			*result = color_getscale("4bit_reflectivity");
+            }break;
 		
 		case 22:
 		case 23:

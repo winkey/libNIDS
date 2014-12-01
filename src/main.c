@@ -256,7 +256,7 @@ void NIDS_get_color(
 	NIDS_color **colors)
 {
 	
-	get_product_dependent_color(data->msg.code, colors);
+	get_product_dependent_color(data->msg.code, data->prod.mode, colors);
 	
 	return;
 }
