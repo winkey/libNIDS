@@ -122,7 +122,7 @@ int main (int argc, char **argv) {
 	/***** fill the color table *****/
 	NIDS_color *colors = NULL;
 	if (!scalename)
-		get_product_dependent_color(data.msg.code, &colors);
+		get_product_dependent_color(data.msg.code, data.prod.mode, &colors);
 	else
 		colors = color_getscale(scalename);
 	
