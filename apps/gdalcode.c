@@ -156,8 +156,10 @@ OGRSpatialReferenceH set_projection(
 	OSRSetWellKnownGeogCS(hSRS, "WGS84");
 	OSRSetWellKnownGeogCS(hSrsSRS, "WGS84");
 	
-	OSRSetGnomonic(hSRS, data->prod.lat, data->prod.lon, 0.0, 0.0);
-	
+    // is this wrong? i used ps on atmos
+	//OSRSetGnomonic(hSRS, data->prod.lat, data->prod.lon, 0.0, 0.0);
+	OSRSetPS(hSRS, data->prod.lat, data->prod.lon, 1.0, 0.0, 0.0);
+
 	MinX = data->prod.lon;
 	MinY = data->prod.lat;
 	

@@ -134,7 +134,8 @@ void get_product_dependent_color(int msgcode, int opmode, NIDS_color **result) {
     			*result = color_getscale("4bit_reflectivity_clear");
             } else {
     			*result = color_getscale("4bit_reflectivity");
-            }break;
+            }
+            break;
 		
 		case 22:
 		case 23:
